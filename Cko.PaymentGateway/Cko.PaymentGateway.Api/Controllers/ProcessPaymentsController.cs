@@ -17,9 +17,9 @@ namespace Cko.PaymentGateway.Controllers
         }
 
         [HttpPost(Name = "ProcessPayment")]
-        public IActionResult ProcessPayment(PaymentRequest paymentRequest)
+        public async Task<IActionResult> ProcessPayment(PaymentRequest paymentRequest)
         {
-            var response = _paymentProcessor.ProcessPayment(paymentRequest);
+            var response = await _paymentProcessor.ProcessPayment(paymentRequest);
             return Ok(response);
         }
     }

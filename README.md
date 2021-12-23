@@ -1,4 +1,4 @@
-# Checkout payment gateway
+﻿# Checkout payment gateway
 
 ## Build 
 
@@ -11,19 +11,22 @@
     - open console and `cd` the to cloned directory
     - Now type `cd Cko.PaymentGateway`
     - ` dotnet run --project .\Cko.PaymentGateway.Api\Cko.PaymentGateway.Api.csproj`
+    - Open http://localhost:5678/swagger/index.html in your browser to see the API documentation
   - To run the Banking simulator
     - open another console and `cd` to the cloned directory
     - Now type `cd Cko.PaymentGateway`
     - `dotnet run .\MyBank.Api\MyBank.Api.csproj`
 
 
+
 ## Design Principles
 
-Although this is a fairly simple project and solution I have tried to follow some design principles. It might appear to be overly complex in some aspects and possibly not as fully featured in others, but those were choices based on the desire to demonstrate good coding practices but being conscious of time as well.
+Although this is a fairly simple project and solution I have tried to follow some clean-code design principles. It might appear to be overly complex in some aspects and possibly not as fully featured in others, but those were choices based on the desire to demonstrate good coding practices but being conscious of time as well.
 
 The key projects/ components in the solution are
 
 ## Database
+- 
 
 ## Projects
 

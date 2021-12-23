@@ -13,6 +13,9 @@ namespace Cko.PaymentGateway.Services
         Task<Payment> GetPaymentDetails(string paymentReference);
     }
 
+    /// <summary>
+    /// Payment processor service
+    /// </summary>
     public class PaymentProcessor : IPaymentProcessor
     {
         private readonly ILogger<PaymentProcessor> _logger;
@@ -36,7 +39,7 @@ namespace Cko.PaymentGateway.Services
 
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
-            PaymentResponse? paymentResponse = null;
+            PaymentResponse? paymentResponse = new PaymentResponse();
             var (valid, validationMessage) = IsValid(paymentRequest.Payment);
             if (valid)
             {
@@ -66,8 +69,6 @@ namespace Cko.PaymentGateway.Services
                 paymentResponse.Message = validationMessage;
             }
 
-
-
             return paymentResponse;
         }
 
@@ -78,6 +79,8 @@ namespace Cko.PaymentGateway.Services
             bankReq.CardNumber = paymentRequest.Payment.PaymentCard.CardNumber;
             bankReq.CustomerAddress = paymentRequest.Payment.PaymentCard.CustomerAddress;
             bankReq.Cvv = paymentRequest.Payment.PaymentCard.Cvv;
+
+            return bankReq;
         }
 
         private (bool result, string message) IsValid(Payment payment)
@@ -87,7 +90,7 @@ namespace Cko.PaymentGateway.Services
             if (!results.IsValid)
             {
 
-                return (false, results.ToString("~"));
+                 return (false, results.ToString("~"));
             }
 
             return (true, null);

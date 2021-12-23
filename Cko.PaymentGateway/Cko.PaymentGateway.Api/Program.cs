@@ -21,6 +21,7 @@ try
 
     builder.Services.AddScoped<IPaymentProcessor, PaymentProcessor>();
     builder.Services.AddScoped<PaymentRepository>();
+    builder.Services.AddScoped<BankRepository>();
 
     builder.Services.AddRefitClient<IBankSdk>();
 
