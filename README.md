@@ -1,4 +1,4 @@
-﻿﻿# Checkout payment gateway
+# Checkout payment gateway
 
 ## Build 
 
