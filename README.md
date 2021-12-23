@@ -4,8 +4,7 @@
 
 - The solution is developed in .NET 6/ Visual Studio 2022
 - To build and run
-  - Ensure that you have the .NET 6 runtime and SDK
-  -  on your machine
+  - Ensure that you have the .NET 6 runtime and SDK on your machine
   - **Clone the repository** from 
     - https://github.com/iliasashaikh/cko.git 
   - **To run the Payment Gateway API** 
