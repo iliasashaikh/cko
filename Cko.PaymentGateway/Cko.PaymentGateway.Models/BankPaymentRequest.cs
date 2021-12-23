@@ -9,9 +9,10 @@ namespace Cko.PaymentGateway.Models
     public class BankPaymentRequest
     {
         public int BankId { get; set; }
-        public int CardNumber { get; set; }
+        public string CardNumber { get; set; }
         public string CustomerName { get; set; }
         public string CustomerAddress { get; set; }
         public string MyProperty { get; set; }
+        public string Cvv { get; set; }
     }
 }

@@ -13,5 +13,6 @@ namespace Cko.PaymentGateway.Entities
         public int BankId { get; set; }
         public string BankName { get; set; }
         public string BankIdentifier { get; set; }
+        public string BankApiUrl { get; set; }
     }
 }

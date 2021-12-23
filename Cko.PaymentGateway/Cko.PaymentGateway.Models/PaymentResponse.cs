@@ -9,6 +9,8 @@ namespace Cko.PaymentGateway.Models
 
     public enum PaymentResponseStatus
     {
+        New,
+        Validated,
         Approved,
         Rejected
     }
@@ -16,7 +18,7 @@ namespace Cko.PaymentGateway.Models
     public class PaymentResponse
     {
         public Guid PaymentReference { get; set; }
-        public PaymentResponseStatus Status { get; set;}
+        public PaymentResponseStatus Status { get; set;} = PaymentResponseStatus.New;
         public string Message { get; set; }
     }
 }

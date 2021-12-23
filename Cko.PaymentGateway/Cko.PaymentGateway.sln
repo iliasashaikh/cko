@@ -9,11 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AC21B9C3-929
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9320A082-AEA4-4DDC-ACCC-7C5C5B5880F4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DBBF2574-8102-4F94-A47C-AC6F9C458941}"
-	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{DD878B72-1B38-4E49-8694-59F83BF305C2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{F7B623B0-E39B-4121-8938-EB2CFEC0F1D2}"
@@ -34,9 +29,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cko.PaymentGateway.Models",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyBank.Api", "MyBank.Api\MyBank.Api.csproj", "{FE3BE201-C098-4034-BB11-3EDDB2346DF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cko.PaymentGateway.UnitTests", "Tests\Cko.PaymentGateway.UnitTests\Cko.PaymentGateway.UnitTests.csproj", "{D50BFB05-C286-466B-8BF4-3614D3D636C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cko.PaymentGateway.UnitTests", "Tests\Cko.PaymentGateway.UnitTests\Cko.PaymentGateway.UnitTests.csproj", "{D50BFB05-C286-466B-8BF4-3614D3D636C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cko.PaymentGateway.IntegrationTests", "Tests\Cko.PaymentGateway.IntegrationTests\Cko.PaymentGateway.IntegrationTests.csproj", "{14F3BD83-9AE2-418F-A59A-D3871130B27D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cko.PaymentGateway.IntegrationTests", "Tests\Cko.PaymentGateway.IntegrationTests\Cko.PaymentGateway.IntegrationTests.csproj", "{14F3BD83-9AE2-418F-A59A-D3871130B27D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0372EF8E-DF51-4CD4-AD2F-E4F96A6DDDDA}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
