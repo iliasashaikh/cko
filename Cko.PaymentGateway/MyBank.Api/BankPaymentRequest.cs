@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cko.PaymentGateway.Models
+namespace MyBank.Api
 {
     public class BankPaymentRequest
     {
