@@ -1,6 +1,8 @@
 using Cko.PaymentGateway.Repository;
 using Cko.PaymentGateway.Services;
 using Serilog;
+using Refit;
+using Cko.PaymentGateway.Models;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -20,6 +22,8 @@ try
     builder.Services.AddScoped<IPaymentProcessor, PaymentProcessor>();
     builder.Services.AddScoped<PaymentRepository>();
 
+    builder.Services.AddRefitClient<IBankSdk>();
+
     // Add Serilog
     builder.Host.UseSerilog((ctx, lc) =>
         lc.WriteTo.Console()
@@ -34,10 +38,6 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
-    //app.UseHttpsRedirection();
-
-    //app.UseAuthorization();
 
     app.MapControllers();
 

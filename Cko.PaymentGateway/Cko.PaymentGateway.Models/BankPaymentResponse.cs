@@ -8,6 +8,7 @@ namespace Cko.PaymentGateway.Models
 {
     public class BankPaymentResponse
     {
-
+        public int BankReponseCode { get; set; }
+        public Guid PaymentReference { get; set; }
     }
 }

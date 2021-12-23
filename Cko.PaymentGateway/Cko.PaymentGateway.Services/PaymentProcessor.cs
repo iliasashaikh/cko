@@ -10,7 +10,7 @@ namespace Cko.PaymentGateway.Services
     public interface IPaymentProcessor
     {
         Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest);
-        Payment GetPaymentDetails(string paymentReference);
+        Task<Payment> GetPaymentDetails(string paymentReference);
     }
 
     public class PaymentProcessor : IPaymentProcessor
@@ -26,7 +26,7 @@ namespace Cko.PaymentGateway.Services
             this._bank = bank;
         }
 
-        public async Payment GetPaymentDetails(string paymentReference)
+        public async Task<Payment> GetPaymentDetails(string paymentReference)
         {
             var payment = await _paymentRepository.GetPaymentDetails(paymentReference);
             return payment;
@@ -34,19 +34,28 @@ namespace Cko.PaymentGateway.Services
 
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
+            PaymentResponse? paymentResponse = null;
             if (IsValid(paymentRequest.Payment))
             {
-                var bankResponse = _bank.SendPayment(paymentRequest.Payment);
-                if (bankResponse.Status = BankReponseStatus.OK)
+                var bankPaymentRequest = new BankPaymentRequest();
+
+                var bankResponse = await _bank.ProcessPayment(bankPaymentRequest);
+                if (bankResponse.BankReponseCode == 0)
                 {
-                    paymentRequest.Payment = bankResponse;
+                    paymentResponse.Status = PaymentResponseStatus.Approved;
                 }    
             }
             else
             {
-                return new PaymentResponse().Status = PaymentResponseStatus.Rejected;
+                paymentResponse.Status = PaymentResponseStatus.Rejected;
             }
            
+            return paymentResponse;
+        }
+
+        private bool IsValid(Payment payment)
+        {
+            throw new NotImplementedException();
         }
     }
 }

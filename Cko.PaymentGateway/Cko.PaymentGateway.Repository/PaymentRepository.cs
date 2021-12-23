@@ -15,6 +15,11 @@ namespace Cko.PaymentGateway.Repository
         public PaymentRepository(IConfiguration settings, ILogger<PaymentRepository> logger) : base(settings, logger)
         {
         }
+
+        public async Task<Payment> GetPaymentDetails(string paymentReference) 
+        {
+            return await Task.Run(() => new Payment());
+        }
     }
 
 
