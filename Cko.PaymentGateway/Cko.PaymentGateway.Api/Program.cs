@@ -1,14 +1,15 @@
+using Cko.PaymentGateway.Models;
 using Cko.PaymentGateway.Repository;
 using Cko.PaymentGateway.Services;
-using Serilog;
+using Microsoft.OpenApi.Models;
 using Refit;
-using Cko.PaymentGateway.Models;
+using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
-Log.Information("Starting up");
+Log.Information("Payment Gateway starting up....");
 
 try
 {
@@ -17,7 +18,15 @@ try
     // Add services to the container.
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "Pay faster => => with Checkout.com",
+            Description = "Checkout API Built with .NET Core 6",
+        });
+    });
 
     builder.Services.AddScoped<IPaymentProcessor, PaymentProcessor>();
     builder.Services.AddScoped<PaymentRepository>();
@@ -33,12 +42,14 @@ try
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+
 
     app.MapControllers();
 

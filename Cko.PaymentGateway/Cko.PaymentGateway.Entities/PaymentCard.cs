@@ -15,7 +15,7 @@ namespace Cko.PaymentGateway.Entities
         public string? BankIdentifierCode { get; set; }
         public DateTime CardExpiry { get; set; }
         public string? CardNumber { get; set; }
-
+        public Guid CustomerReference { get; set; }
         public string? CustomerName { get; set; }
         public string? CustomerAddress { get; set; }
         public string Cvv { get; set; }

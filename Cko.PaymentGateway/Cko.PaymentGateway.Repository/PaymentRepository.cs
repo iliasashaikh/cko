@@ -16,7 +16,7 @@ namespace Cko.PaymentGateway.Repository
         {
         }
 
-        public async Task<Payment> GetPaymentDetails(string paymentReference) 
+        public async Task<Payment> GetPaymentDetails(string paymentReference)
         {
             return await Task.Run(() => new Payment());
         }

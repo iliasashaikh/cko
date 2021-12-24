@@ -12,7 +12,6 @@ namespace Cko.PaymentGateway.Models
         public string CardNumber { get; set; }
         public string CustomerName { get; set; }
         public string CustomerAddress { get; set; }
-        public string MyProperty { get; set; }
         public string Cvv { get; set; }
     }
 }

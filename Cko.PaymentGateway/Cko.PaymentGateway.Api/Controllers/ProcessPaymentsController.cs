@@ -7,6 +7,7 @@ namespace Cko.PaymentGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class ProcessPaymentsController : ControllerBase
     {
         private readonly IPaymentProcessor _paymentProcessor;
