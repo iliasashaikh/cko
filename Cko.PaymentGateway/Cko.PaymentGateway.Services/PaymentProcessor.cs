@@ -40,13 +40,18 @@ namespace Cko.PaymentGateway.Services
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
             PaymentResponse? paymentResponse = new PaymentResponse();
-            var (valid, validationMessage) = IsValid(paymentRequest.Payment);
+
+            // Create a payment entity from the request, we will then validate using the Entity
+            if 
+
+
+            var (valid, validationMessage) = IsValid(paymentRequest);
             if (valid)
             {
                 paymentResponse.Status = PaymentResponseStatus.Validated;
                 paymentResponse.Message = "Card accepted, sending to bank";
 
-                var bankId = paymentRequest.Payment.PaymentCard.BankIdentifierCode;
+                var bankId = paymentRequest.PaymentCard.BankIdentifierCode;
                 var bank = await _bankRepository.GetBankByIdentifier(bankId);
                 var bankPaymentReq = MakeBankPaymentRequest(paymentRequest);
                 var banksdk = RestService.For<IBankSdk>(bank.BankApiUrl);
@@ -75,10 +80,10 @@ namespace Cko.PaymentGateway.Services
         private BankPaymentRequest MakeBankPaymentRequest(PaymentRequest paymentRequest)
         {
             var bankReq = new BankPaymentRequest();
-            bankReq.CustomerName = paymentRequest.Payment.PaymentCard.CustomerName;
-            bankReq.CardNumber = paymentRequest.Payment.PaymentCard.CardNumber;
-            bankReq.CustomerAddress = paymentRequest.Payment.PaymentCard.CustomerAddress;
-            bankReq.Cvv = paymentRequest.Payment.PaymentCard.Cvv;
+            bankReq.CustomerName = paymentRequest.CustomerName;
+            bankReq.CardNumber = paymentRequest.CardNumber;
+            bankReq.CustomerAddress = paymentRequest.CustomerAddress;
+            bankReq.Cvv = paymentRequest.Cvv;
 
             return bankReq;
         }

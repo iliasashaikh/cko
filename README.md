@@ -23,10 +23,11 @@
 
 Although this is a fairly simple project and solution I have tried to follow some clean-code design principles. It might appear to be overly complex in some aspects and possibly not as fully featured in others, but those were choices based on the desire to demonstrate good coding practices but being conscious of time as well.
 
-The key projects/ components in the solution are
-
 ## Database
-- 
+- I have used a Sql server database 
+- The database is included in the repository and consists of
+  - Cko.PaymentGateway\Db\cko.mdf
+  - Cko.PaymentGateway\Db\cko.ldf
 
 ## Projects
 
@@ -49,6 +50,15 @@ The key projects/ components in the solution are
 - FluentValidation
 - NUnit - testing
 - Swashbuckle - Swagger API documentation
+- AutoMapper
+
+
+## Data flow
+- Merchant calls the Checkout API at localhost/api/processPayment with a `PaymentRequest` as Json in the Request body
+- The controller calls a service `Payment Processor` to process the request
+- If the customer exists in the database, the service uses the stored card details if those aren't provided, else uses the one stored in the database
+- If the card is valid, the Bank Api is called using a `Refit` wrapper
+
 
 ## Areas for improvement
 - **Database** - Since the use case is quite simple I could have used a non-relational database possibly cloud hosted, e.g. MongoDb Atlas, Cosmos Db etc.
