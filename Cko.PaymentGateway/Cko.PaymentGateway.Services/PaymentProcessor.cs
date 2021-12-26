@@ -43,6 +43,18 @@ namespace Cko.PaymentGateway.Services
             var (valid, validationMessage) = IsValid(paymentRequest);
             if (valid)
             {
+
+                if (!MerchantExists(paymentRequest.MerchantId))
+                {
+                    paymentResponse.Status = PaymentResponseStatus.Rejected_MerchantNotFound;
+                    return paymentResponse;
+                }
+                
+                if (!CustomerExists(paymentRequest.CustomerReference) || paymentRequest.SaveCustomerDetails )
+                {
+                    SaveCustomerDetails(paymentRequest);
+                }
+
                 paymentResponse.Status = PaymentResponseStatus.Validated;
                 paymentResponse.PaymentResponseMessage = "Card accepted, sending to bank";
 
@@ -59,13 +71,13 @@ namespace Cko.PaymentGateway.Services
                 }
                 else
                 {
-                    paymentResponse.Status = PaymentResponseStatus.Rejected;
+                    paymentResponse.Status = PaymentResponseStatus.Rejected_DeclinedByBank;
                     paymentResponse.PaymentResponseMessage = bankResponse.Message;
                 }
             }
             else
             {
-                paymentResponse.Status = PaymentResponseStatus.Rejected;
+                paymentResponse.Status = PaymentResponseStatus.Rejected_CardValidationFailed;
                 paymentResponse.PaymentResponseMessage = validationMessage;
             }
 

@@ -20,8 +20,33 @@ namespace Cko.PaymentGateway.Controllers
         [HttpPost(Name = "ProcessPayment")]
         public async Task<IActionResult> ProcessPayment(PaymentRequest paymentRequest)
         {
-            var response = await _paymentProcessor.ProcessPayment(paymentRequest);
-            return Ok(response);
+            try
+            {
+                var response = await _paymentProcessor.ProcessPayment(paymentRequest);
+                switch (response.Status)
+                {
+                    case PaymentResponseStatus.Approved:
+                        return Ok(response);
+
+                    case PaymentResponseStatus.Rejected_MerchantNotFound:
+                        return NotFound(response);
+
+                    case PaymentResponseStatus.Rejected_CustomerNotFound:
+                        return NotFound(response);
+
+                    case PaymentResponseStatus.Rejected_CardValidationFailed:
+                        return UnprocessableEntity(response);
+
+                    case PaymentResponseStatus.Rejected_DeclinedByBank:
+                        return UnprocessableEntity(response);
+                    default:
+                        return BadRequest(response);
+                }
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
     }
 }
