@@ -6,6 +6,10 @@ namespace Cko.PaymentGateway.Repository
 {
     public class MerchantRepository : DapperRepository<Merchant>
     {
+        public MerchantRepository():this(null,null)
+        {
+
+        }
         public MerchantRepository(IConfiguration settings, ILogger<MerchantRepository> logger) : base(settings, logger)
         {
         }

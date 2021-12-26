@@ -21,12 +21,23 @@ namespace Cko.PaymentGateway.Services
         private readonly ILogger<PaymentProcessor> _logger;
         private readonly PaymentRepository _paymentRepository;
         private readonly BankRepository _bankRepository;
+        private readonly CustomerRepository _customerRepository;
+        private readonly PaymentCardRepository _paymentCardRepository;
+        private readonly MerchantRepository _merchantRepository;
 
-        public PaymentProcessor(ILogger<PaymentProcessor> logger, PaymentRepository paymentRepository, BankRepository bankRepository)
+        public PaymentProcessor(ILogger<PaymentProcessor> logger,
+                                PaymentRepository paymentRepository,
+                                BankRepository bankRepository,
+                                CustomerRepository customerRepository,
+                                PaymentCardRepository paymentCardRepository,
+                                MerchantRepository merchantRepository)
         {
             this._logger = logger;
             this._paymentRepository = paymentRepository;
             this._bankRepository = bankRepository;
+            this._customerRepository = customerRepository;
+            this._paymentCardRepository = paymentCardRepository;
+            this._merchantRepository = merchantRepository;
         }
 
         public async Task<Payment> GetPaymentDetails(string paymentReference)
@@ -43,16 +54,50 @@ namespace Cko.PaymentGateway.Services
             var (valid, validationMessage) = IsValid(paymentRequest);
             if (valid)
             {
-
-                if (!MerchantExists(paymentRequest.MerchantId))
+                var merchant = await _merchantRepository.GetMerchantByIdentifier(paymentRequest.MerchantId);
+                if (merchant == null)
                 {
                     paymentResponse.Status = PaymentResponseStatus.Rejected_MerchantNotFound;
+                    paymentResponse.PaymentResponseMessage = $"The supplied Merchant with Id = {paymentRequest.MerchantId} not found";
                     return paymentResponse;
                 }
-                
-                if (!CustomerExists(paymentRequest.CustomerReference) || paymentRequest.SaveCustomerDetails )
+
+                Customer customer = new Customer();
+                PaymentCard paymentCard = new PaymentCard();
+
+                if (paymentRequest.CustomerReference != Guid.Empty)
                 {
-                    SaveCustomerDetails(paymentRequest);
+                    customer = await _customerRepository.GetCustomerByReference(paymentCard.CustomerReference);
+                    paymentCard = await _paymentCardRepository.GetPaymentCardByCustomerReference(paymentCard.CustomerReference);
+
+                    if (customer == null)
+                    {
+                        paymentResponse.Status = PaymentResponseStatus.Rejected_CustomerNotFound;
+                        paymentResponse.PaymentResponseMessage = $"The supplied Customer with reference = {paymentRequest.CustomerReference} not found";
+                        return paymentResponse;
+                    }
+                }
+
+                paymentCard.CardExpiry = paymentRequest.CardExpiry == default(DateTime) ? paymentCard.CardExpiry : paymentRequest.CardExpiry;
+                paymentCard.CardNumber = paymentRequest.CardNumber == default(string) ? paymentCard.CardNumber : paymentRequest.CardNumber;
+                paymentCard.CustomerAddress = paymentRequest.CustomerAddress == default(string) ? paymentCard.CustomerAddress : paymentRequest.CustomerAddress;
+                paymentCard.CustomerName = paymentRequest.CustomerName == default(string) ? paymentCard.CustomerName : paymentRequest.CustomerName;
+
+                customer.CustomerName = paymentRequest.CustomerName == default(string) ? customer.CustomerName : paymentRequest.CustomerName;
+                customer.CustomerAddress = paymentRequest.CustomerAddress == default(string) ? customer.CustomerAddress : paymentRequest.CustomerAddress;
+
+                if (paymentRequest.SaveCustomerDetails)
+                {
+                    if (paymentRequest.CustomerReference == Guid.Empty)
+                    {
+                        await _customerRepository.Insert(customer);
+                        await _paymentCardRepository.Insert(paymentCard);
+                    }
+                    else
+                    {
+                        await _customerRepository.Update(customer);
+                        await _paymentCardRepository.Update(paymentCard);
+                    }
                 }
 
                 paymentResponse.Status = PaymentResponseStatus.Validated;
@@ -60,7 +105,8 @@ namespace Cko.PaymentGateway.Services
 
                 var bankId = paymentRequest.BankIdentifierCode;
                 var bank = await _bankRepository.GetBankByIdentifier(bankId);
-                var bankPaymentReq = MakeBankPaymentRequest(paymentRequest);
+                var bankPaymentReq = MakeBankPaymentRequest(paymentCard);
+
                 var banksdk = RestService.For<IBankSdk>(bank.BankApiUrl);
 
                 var bankResponse = await banksdk.ProcessPayment(bankPaymentReq);
@@ -84,13 +130,13 @@ namespace Cko.PaymentGateway.Services
             return paymentResponse;
         }
 
-        private BankPaymentRequest MakeBankPaymentRequest(PaymentRequest paymentRequest)
+        private BankPaymentRequest MakeBankPaymentRequest(PaymentCard paymentCard)
         {
             var bankReq = new BankPaymentRequest();
-            bankReq.CustomerName = paymentRequest.CustomerName;
-            bankReq.CardNumber = paymentRequest.CardNumber;
-            bankReq.CustomerAddress = paymentRequest.CustomerAddress;
-            bankReq.Cvv = paymentRequest.Cvv;
+            bankReq.CustomerName = paymentCard.CustomerName;
+            bankReq.CardNumber = paymentCard.CardNumber;
+            bankReq.CustomerAddress = paymentCard.CustomerAddress;
+            bankReq.Cvv = paymentCard.Cvv;
 
             return bankReq;
         }
@@ -102,7 +148,7 @@ namespace Cko.PaymentGateway.Services
             if (!results.IsValid)
             {
 
-                 return (false, results.ToString(Environment.NewLine));
+                return (false, results.ToString(Environment.NewLine));
             }
 
             return (true, string.Empty);

@@ -11,20 +11,32 @@ namespace Cko.PaymentGateway.UnitTests
     public class PaymentProcesorUnitTests
     {
 
-        private (PaymentProcessor paymentProcessor,
-                ILogger<PaymentProcessor> mockLogger,
-                PaymentRepository mockPaymentRepo,
-                BankRepository mockBankRepo) MakeTestPaymentProcessor()
+        private (
+                    PaymentProcessor paymentProcessor,
+                    ILogger<PaymentProcessor> mockLogger,
+                    PaymentRepository mockPaymentRepo,
+                    BankRepository mockBankRepo,
+                    CustomerRepository mockCustomerRepo,
+                    PaymentCardRepository mockPaymentCardRepo,
+                    MerchantRepository mockMerchantRepo
+                ) MakeTestPaymentProcessor()
         {
             var logger = Substitute.For<ILogger<PaymentProcessor>>();
             var paymentRepository = Substitute.For<PaymentRepository>();
             var bankRepository = Substitute.For<BankRepository>();
+            var customerRepository = Substitute.For<CustomerRepository>();
+            var paymentCardRepository = Substitute.For<PaymentCardRepository>();
+            var merchantRepository = Substitute.For<MerchantRepository>();
 
             return (
-                    new PaymentProcessor(logger, paymentRepository, bankRepository),
+                    new PaymentProcessor(logger, paymentRepository, bankRepository, customerRepository, paymentCardRepository, merchantRepository),
                     logger,
                     paymentRepository,
-                    bankRepository);
+                    bankRepository,
+                    customerRepository,
+                    paymentCardRepository,
+                    merchantRepository
+                    );
         }
 
         [Test]
