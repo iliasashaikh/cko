@@ -6,13 +6,13 @@ namespace Cko.PaymentGateway.IntegrationTests
     public class PaymentProcesorIntTests
     {
         [Test]
-        void Test_PaymentDetailsAddedToDb()
+        public void Test_PaymentDetailsAddedToDb()
         {
             
         }
 
         [Test]
-        void Test_PaymentDetailsFetchedFromDb()
+        public void Test_PaymentDetailsFetchedFromDb()
         {
 
         }

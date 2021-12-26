@@ -17,6 +17,7 @@ namespace Cko.PaymentGateway.Models
         public string Cvv { get; set; } = string.Empty;
         public DateTime CardExpiry { get; set; }
         public string BankIdentifierCode { get; set; } = string.Empty;
+        public bool SaveCustomerDetails { get; set; }
 
         // Purchase Info
         public string ItemDetails { get; set; } = string.Empty;
