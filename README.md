@@ -29,6 +29,13 @@ Although this is a fairly simple project and solution I have tried to follow som
   - Cko.PaymentGateway\Db\cko.mdf
   - Cko.PaymentGateway\Db\cko.ldf
 
+### DataModel
+
+Entities
+
+
+
+
 ## Projects
 
 ### Gateway API

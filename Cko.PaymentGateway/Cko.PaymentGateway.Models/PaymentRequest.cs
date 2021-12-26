@@ -1,4 +1,5 @@
 ﻿using Cko.PaymentGateway.Entities;
+using FluentValidation;
 using System.ComponentModel.DataAnnotations;
 
 namespace Cko.PaymentGateway.Models
@@ -7,20 +8,20 @@ namespace Cko.PaymentGateway.Models
     {
 
         // Customer details
-        public string CustomerName { get; set; }
-        public string CustomerAddress { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerAddress { get; set; } = string.Empty;
         public Guid CustomerReference { get; set; }
 
         // Card details
-        public string CardNumber { get; set; }
-        public string Cvv { get; set; }
+        public string CardNumber { get; set; } = string.Empty;
+        public string Cvv { get; set; } = string.Empty;
         public DateTime CardExpiry { get; set; }
-        public string BankIdentifierCode { get; set; }
+        public string BankIdentifierCode { get; set; } = string.Empty;
 
         // Purchase Info
-        public string? ItemDetails { get; set; }
+        public string ItemDetails { get; set; } = string.Empty;
         public decimal Amount { get; set; }
-        public string? Ccy { get; set; }
+        public string Ccy { get; set; } = string.Empty;
 
 
         // Merchant Details
@@ -28,4 +29,38 @@ namespace Cko.PaymentGateway.Models
         public int MerchantName { get; set; }
 
     }
+
+    public class PaymentRequestValidator : AbstractValidator<PaymentRequest>
+    {
+        public PaymentRequestValidator()
+        {
+            RuleFor(p => p.Amount).NotEmpty().GreaterThan(0);
+            RuleFor(p => p.Ccy).NotEmpty().Length(3);
+            RuleFor(p => p.CardNumber).NotEmpty().CreditCard();
+
+            RuleFor(p => p.MerchantId).NotEmpty();
+
+            RuleFor(p => p.CustomerReference).NotEmpty()
+                                             .When
+                                                (p =>
+                                                    string.IsNullOrEmpty(p.CustomerName) ||
+                                                    string.IsNullOrEmpty(p.CustomerAddress) ||
+                                                    string.IsNullOrEmpty(p.CardNumber) ||
+                                                    string.IsNullOrEmpty(p.Cvv) ||
+                                                    string.IsNullOrEmpty(p.BankIdentifierCode)
+                                                    )
+                                                .WithMessage("All Customer and Card details should be filled int when Cusotmer reference is not provided");
+            RuleFor(p => p.CustomerReference).Empty().DependentRules(
+                ()=>
+                {
+                    RuleFor(p => p.CustomerAddress).NotEmpty();
+                    RuleFor(p => p.CustomerName).NotEmpty();
+                    RuleFor(p => p.CustomerAddress).NotEmpty();
+                    RuleFor(p => p.CardNumber).NotEmpty();
+                    RuleFor(p => p.Cvv).NotEmpty();
+                    RuleFor(p => p.BankIdentifierCode).NotEmpty();
+                });
+        }
+    }
+
 }

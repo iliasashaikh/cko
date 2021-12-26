@@ -9,9 +9,9 @@ namespace MyBank.Api
     public class BankPaymentRequest
     {
         public int BankId { get; set; }
-        public string CardNumber { get; set; }
-        public string CustomerName { get; set; }
-        public string CustomerAddress { get; set; }
-        public string Cvv { get; set; }
+        public string CardNumber { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerAddress { get; set; } = string.Empty;
+        public string Cvv { get; set; } = string.Empty;
     }
 }

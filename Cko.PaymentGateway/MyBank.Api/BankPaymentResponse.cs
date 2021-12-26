@@ -4,6 +4,6 @@
     {
         public int BankReponseCode { get; set; }
         public Guid PaymentReference { get; set; }
-        public string Message { get; set; }
+        public string BankPaymentResponseMessage { get; set; } = string.Empty;
     }
 }

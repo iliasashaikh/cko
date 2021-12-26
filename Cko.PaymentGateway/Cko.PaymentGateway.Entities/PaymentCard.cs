@@ -18,7 +18,7 @@ namespace Cko.PaymentGateway.Entities
         public Guid CustomerReference { get; set; }
         public string? CustomerName { get; set; }
         public string? CustomerAddress { get; set; }
-        public string Cvv { get; set; }
+        public string? Cvv { get; set; }
     }
 
     public class PaymentCardValidator : AbstractValidator<PaymentCard>

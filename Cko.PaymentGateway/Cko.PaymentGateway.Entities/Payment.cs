@@ -7,25 +7,24 @@ namespace Cko.PaymentGateway.Entities
     {
         [Key]
         public int PaymentId { get; set; }
-        public string? PaymentReference { get; set; }
+        public string PaymentReference { get; set; } = string.Empty;
         public Guid CustomerReference { get; set; }
         public int MerchantId { get; set; }
         public DateTime PaymentTime { get; set; }
         public decimal Amount { get; set; }
-        public string? Ccy { get; set; }
+        public string Ccy { get; set; } = string.Empty;
         public DateTime CreatedTime { get; set; }
-        public string? ItemDetails { get; set; }
-        public PaymentCard? PaymentCard { get; set; }
+        public string ItemDetails { get; set; } = string.Empty;
+        public PaymentState State { get; set; }
+        public string PaymentInfo { get; set; } = string.Empty;
     }
 
-    public class PaymentValidator : AbstractValidator<Payment>
+    public enum PaymentState
     {
-        public PaymentValidator()
-        {
-            RuleFor(p=>p.Amount).NotEmpty().GreaterThan(0);
-            RuleFor(p => p.Ccy).NotEmpty().Length(3);
-            RuleFor(p=>p.PaymentCard).NotNull().SetValidator(new PaymentCardValidator());
-        }
+        UnProcessed,
+        Validated,
+        SentToBank,
+        Approved,
+        Rejected
     }
-
 }

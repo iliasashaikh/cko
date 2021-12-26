@@ -11,8 +11,8 @@ namespace Cko.PaymentGateway.Entities
     {
         [Key]
         public int CustomerId { get; set; }
-        public string CustomerName { get; set; }
-        public string CustomerAddress { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerAddress { get; set; } = string.Empty;
         public Guid CustomerReference { get; set; }
     }
 }

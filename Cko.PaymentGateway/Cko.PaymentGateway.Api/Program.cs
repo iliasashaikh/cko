@@ -31,9 +31,9 @@ try
     builder.Services.AddScoped<IPaymentProcessor, PaymentProcessor>();
     builder.Services.AddScoped<PaymentRepository>();
     builder.Services.AddScoped<BankRepository>();
-
     builder.Services.AddRefitClient<IBankSdk>();
-
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+    
     // Add Serilog
     builder.Host.UseSerilog((ctx, lc) =>
         lc.WriteTo.Console()

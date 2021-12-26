@@ -42,16 +42,13 @@ namespace Cko.PaymentGateway.Services
             PaymentResponse? paymentResponse = new PaymentResponse();
 
             // Create a payment entity from the request, we will then validate using the Entity
-            if 
-
-
             var (valid, validationMessage) = IsValid(paymentRequest);
             if (valid)
             {
                 paymentResponse.Status = PaymentResponseStatus.Validated;
-                paymentResponse.Message = "Card accepted, sending to bank";
+                paymentResponse.PaymentResponseMessage = "Card accepted, sending to bank";
 
-                var bankId = paymentRequest.PaymentCard.BankIdentifierCode;
+                var bankId = paymentRequest.BankIdentifierCode;
                 var bank = await _bankRepository.GetBankByIdentifier(bankId);
                 var bankPaymentReq = MakeBankPaymentRequest(paymentRequest);
                 var banksdk = RestService.For<IBankSdk>(bank.BankApiUrl);
@@ -60,18 +57,18 @@ namespace Cko.PaymentGateway.Services
                 if (bankResponse.BankReponseCode == 0)
                 {
                     paymentResponse.Status = PaymentResponseStatus.Approved;
-                    paymentResponse.Message = "Payment processed";
+                    paymentResponse.PaymentResponseMessage = "Payment processed";
                 }
                 else
                 {
                     paymentResponse.Status = PaymentResponseStatus.Rejected;
-                    paymentResponse.Message = bankResponse.Message;
+                    paymentResponse.PaymentResponseMessage = bankResponse.Message;
                 }
             }
             else
             {
                 paymentResponse.Status = PaymentResponseStatus.Rejected;
-                paymentResponse.Message = validationMessage;
+                paymentResponse.PaymentResponseMessage = validationMessage;
             }
 
             return paymentResponse;
@@ -88,14 +85,14 @@ namespace Cko.PaymentGateway.Services
             return bankReq;
         }
 
-        private (bool result, string message) IsValid(Payment payment)
+        private (bool result, string message) IsValid(PaymentRequest payment)
         {
-            var validator = new PaymentValidator();
+            var validator = new PaymentRequestValidator();
             var results = validator.Validate(payment);
             if (!results.IsValid)
             {
 
-                 return (false, results.ToString("~"));
+                 return (false, results.ToString(Environment.NewLine));
             }
 
             return (true, null);
