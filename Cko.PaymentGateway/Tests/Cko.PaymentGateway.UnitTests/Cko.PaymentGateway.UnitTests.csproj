@@ -15,4 +15,12 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Api\Cko.PaymentGateway.Api.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Entities\Cko.PaymentGateway.Entities.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Models\Cko.PaymentGateway.Models.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Repository\Cko.PaymentGateway.Repository.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Services\Cko.PaymentGateway.Services.csproj" />
+  </ItemGroup>
+
 </Project>

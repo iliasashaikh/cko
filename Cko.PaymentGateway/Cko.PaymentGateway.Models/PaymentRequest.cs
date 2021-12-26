@@ -26,7 +26,7 @@ namespace Cko.PaymentGateway.Models
 
         // Merchant Details
         public int MerchantId { get; set; }
-        public int MerchantName { get; set; }
+        public string MerchantName { get; set; } = string.Empty;
 
     }
 
@@ -36,7 +36,6 @@ namespace Cko.PaymentGateway.Models
         {
             RuleFor(p => p.Amount).NotEmpty().GreaterThan(0);
             RuleFor(p => p.Ccy).NotEmpty().Length(3);
-            RuleFor(p => p.CardNumber).NotEmpty().CreditCard();
 
             RuleFor(p => p.MerchantId).NotEmpty();
 
@@ -49,17 +48,14 @@ namespace Cko.PaymentGateway.Models
                                                     string.IsNullOrEmpty(p.Cvv) ||
                                                     string.IsNullOrEmpty(p.BankIdentifierCode)
                                                     )
-                                                .WithMessage("All Customer and Card details should be filled int when Cusotmer reference is not provided");
-            RuleFor(p => p.CustomerReference).Empty().DependentRules(
-                ()=>
-                {
-                    RuleFor(p => p.CustomerAddress).NotEmpty();
-                    RuleFor(p => p.CustomerName).NotEmpty();
-                    RuleFor(p => p.CustomerAddress).NotEmpty();
-                    RuleFor(p => p.CardNumber).NotEmpty();
-                    RuleFor(p => p.Cvv).NotEmpty();
-                    RuleFor(p => p.BankIdentifierCode).NotEmpty();
-                });
+                                                .WithMessage("All Customer and Card details should be filled in when Cusotmer reference is not provided");
+
+            RuleFor(p => p.CustomerAddress).NotEmpty().When(p => p.CustomerReference == default(Guid));
+            RuleFor(p => p.CustomerName).NotEmpty().When(p => p.CustomerReference == default(Guid));
+            RuleFor(p => p.CustomerAddress).NotEmpty().When(p => p.CustomerReference == default(Guid));
+            RuleFor(p => p.CardNumber).NotEmpty().CreditCard().When(p => p.CustomerReference == default(Guid));
+            RuleFor(p => p.Cvv).NotEmpty().When(p => p.CustomerReference == default(Guid));
+            RuleFor(p => p.BankIdentifierCode).NotEmpty().When(p => p.CustomerReference == default(Guid));
         }
     }
 

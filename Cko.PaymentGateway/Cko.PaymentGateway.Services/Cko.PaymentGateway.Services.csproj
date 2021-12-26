@@ -18,5 +18,6 @@
     <ProjectReference Include="..\Cko.PaymentGateway.Models\Cko.PaymentGateway.Models.csproj" />
     <ProjectReference Include="..\Cko.PaymentGateway.Repository\Cko.PaymentGateway.Repository.csproj" />
   </ItemGroup>
-
+	
+	
 </Project>

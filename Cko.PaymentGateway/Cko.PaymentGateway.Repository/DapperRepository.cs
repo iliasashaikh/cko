@@ -22,7 +22,9 @@ namespace Cko.PaymentGateway.Repository
         {
             this._settings = settings;
             this._logger = logger;
-            this._connString = settings.GetConnectionString("CkoDb");
+            
+            if (settings!=null)
+                this._connString = settings.GetConnectionString("CkoDb");
         }
 
  

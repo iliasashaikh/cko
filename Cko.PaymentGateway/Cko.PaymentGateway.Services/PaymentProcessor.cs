@@ -21,14 +21,12 @@ namespace Cko.PaymentGateway.Services
         private readonly ILogger<PaymentProcessor> _logger;
         private readonly PaymentRepository _paymentRepository;
         private readonly BankRepository _bankRepository;
-        private readonly IBankSdk _bankSdk;
 
-        public PaymentProcessor(ILogger<PaymentProcessor> logger, PaymentRepository paymentRepository, BankRepository bankRepository, IBankSdk bankSdk)
+        public PaymentProcessor(ILogger<PaymentProcessor> logger, PaymentRepository paymentRepository, BankRepository bankRepository)
         {
             this._logger = logger;
             this._paymentRepository = paymentRepository;
             this._bankRepository = bankRepository;
-            this._bankSdk = bankSdk;
         }
 
         public async Task<Payment> GetPaymentDetails(string paymentReference)
@@ -85,7 +83,7 @@ namespace Cko.PaymentGateway.Services
             return bankReq;
         }
 
-        private (bool result, string message) IsValid(PaymentRequest payment)
+        internal (bool result, string message) IsValid(PaymentRequest payment)
         {
             var validator = new PaymentRequestValidator();
             var results = validator.Validate(payment);
@@ -95,7 +93,7 @@ namespace Cko.PaymentGateway.Services
                  return (false, results.ToString(Environment.NewLine));
             }
 
-            return (true, null);
+            return (true, string.Empty);
         }
     }
 }

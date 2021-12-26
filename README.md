@@ -31,8 +31,10 @@ Although this is a fairly simple project and solution I have tried to follow som
 
 ### DataModel
 
-Entities
-
+**Entities**
+- Payment 
+  - Stores all information for a payment request
+  - Stores the current state on the payment in 
 
 
 
@@ -49,8 +51,11 @@ Entities
 ### Bank Simulator
 - MyBank.API
 
-## Key Libraries
-- Polly - resiliency framework
+### Tests
+- test/Cko.PaymentGateway.IntegrationTests
+- Cko.PaymentGateway.UnitTests
+
+## Key External Libraries
 - Refit - http client factory & used for Bank Sdk
 - Dapper - fast data access
 - Serilog - logging framework
@@ -58,6 +63,12 @@ Entities
 - NUnit - testing
 - Swashbuckle - Swagger API documentation
 - AutoMapper
+- NSubstitute - Mocking framework to mock dependencies for unit tests
+
+## Design decisions
+- All entities and model class properties are non-nullable
+- Internal methods are tested using the `InternalsVisibleTo` assembly attribute.
+- The Data Model is deliberately simple, e.g. All Names and Addresses are a single field/ column and not split into constituent parts as would be in a production system.
 
 
 ## Data flow
@@ -66,9 +77,15 @@ Entities
 - If the customer exists in the database, the service uses the stored card details if those aren't provided, else uses the one stored in the database
 - If the card is valid, the Bank Api is called using a `Refit` wrapper
 
+**Assumptions**
+- It is expected that the Merchant has been setup in the system previously and the request includes a valid `MerchantId` that is present in the Checkout Db.
+- The customer details can be looked up from the database if a GUID for a customer is passed in, else the payment request should contain all customer details necessary.
+- The merchant can ask for the customer details to be saved, in which case they are saved and the response includes a generated customer reference.
+
 
 ## Areas for improvement
 - **Database** - Since the use case is quite simple I could have used a non-relational database possibly cloud hosted, e.g. MongoDb Atlas, Cosmos Db etc.
 - **Authentication/ Authorisation** - Ideally I would have liked to implement authentication & authorisation, either storing credentials in the  database and use ASP.NET Core Identity. Not sure how appropriate it would be to use external providers like Google, Microsoft etc.
 - **HTTPS** - The APIs are hosted over Http. It would be fairly simple to set the APIs up for https, but it would have added to the complexity of running the code.
+- To improve resilience in production code, I would ideally incorporate the library Polly.NET.
 

@@ -12,6 +12,11 @@ namespace Cko.PaymentGateway.Repository
 {
     public class PaymentRepository : DapperRepository<Payment>
     {
+        public PaymentRepository():this(null,null)
+        {
+
+        }
+
         public PaymentRepository(IConfiguration settings, ILogger<PaymentRepository> logger) : base(settings, logger)
         {
         }
