@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Cko.PaymentGateway.Entities
 {
+    [Table("Bank")]
     public class Bank
     {
         [Key]

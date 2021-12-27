@@ -7,6 +7,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="db\cko.ldf" />
+	  <None Remove="db\cko.mdf" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="db\cko.ldf">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="db\cko.mdf">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="10.1.1" />
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
@@ -37,5 +51,14 @@
 		<ProjectReference Include="..\Cko.PaymentGateway.Repository\Cko.PaymentGateway.Repository.csproj" />
 		<ProjectReference Include="..\Cko.PaymentGateway.Services\Cko.PaymentGateway.Services.csproj" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<OutputPath>bin\</OutputPath>
+		<DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+	</PropertyGroup>
+
+
 
 </Project>

@@ -3,6 +3,7 @@ using FluentValidation;
 
 namespace Cko.PaymentGateway.Entities
 {
+    [Table("Payment")]
     public class Payment
     {
         [Key]

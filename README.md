@@ -18,11 +18,6 @@
     - `dotnet run .\MyBank.Api\MyBank.Api.csproj`
 
 
-
-## Design Principles
-
-Although this is a fairly simple project and solution I have tried to follow some clean-code design principles. It might appear to be overly complex in some aspects and possibly not as fully featured in others, but those were choices based on the desire to demonstrate good coding practices but being conscious of time as well.
-
 ## Database
 - I have used a Sql server database 
 - The database is included in the repository and consists of
@@ -32,9 +27,26 @@ Although this is a fairly simple project and solution I have tried to follow som
 ### DataModel
 
 **Entities**
+
 - Payment 
   - Stores all information for a payment request
-  - Stores the current state on the payment in 
+  - Stores the current state on the payment and is used to retrieve Payment details at a later time
+- Merchant
+  - Represents a merchant, the payment request ***must*** include an existing MerchantID
+- Bank
+  - Used to store the API for a bank
+- Payment Card
+  - Stores customer card details
+- Customer
+  - Stores customer details
+
+### Data acess
+- All dataaccess is via 'Repositories' using the `Repository` pattern.
+- Uses `Dapper` as a micro-orm
+  
+> Why not Entity Framework?
+> 
+> Dapper is more performant, and as someone who is fairly comfortable with writing sql, I usually prefer Dapper to EF.
 
 
 
@@ -64,12 +76,17 @@ Although this is a fairly simple project and solution I have tried to follow som
 - Swashbuckle - Swagger API documentation
 - AutoMapper
 - NSubstitute - Mocking framework to mock dependencies for unit tests
+- Scrutor - to scan and register with DI container
 
 ## Design decisions
+
+Although this is a fairly simple project and solution I have tried to follow some clean-code design principles. It might appear to be overly complex in some aspects and possibly not as fully featured in others, but those were choices based on the desire to demonstrate good coding practices but being conscious of time as well.
+
+- The `Controller` is very slim, and all it does is call into other services that implement the logic.
 - All entities and model class properties are non-nullable
 - Internal methods are tested using the `InternalsVisibleTo` assembly attribute.
 - The Data Model is deliberately simple, e.g. All Names and Addresses are a single field/ column and not split into constituent parts as would be in a production system.
-
+  
 
 ## Data flow
 - Merchant calls the Checkout API at localhost/api/processPayment with a `PaymentRequest` as Json in the Request body
@@ -81,6 +98,7 @@ Although this is a fairly simple project and solution I have tried to follow som
 - It is expected that the Merchant has been setup in the system previously and the request includes a valid `MerchantId` that is present in the Checkout Db.
 - The customer details can be looked up from the database if a GUID for a customer is passed in, else the payment request should contain all customer details necessary.
 - The merchant can ask for the customer details to be saved, in which case they are saved and the response includes a generated customer reference.
+- All dataaccess uses the 
 
 
 ## Areas for improvement

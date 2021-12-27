@@ -22,12 +22,12 @@ namespace Cko.PaymentGateway.Repository
         {
             this._settings = settings;
             this._logger = logger;
-            
+
             if (settings!=null)
                 this._connString = settings.GetConnectionString("CkoDb");
         }
 
- 
+
         public async Task<IEnumerable<T>> Get(string query, object? parameters = null)
         {
             try
@@ -35,7 +35,7 @@ namespace Cko.PaymentGateway.Repository
                 using (var conn = new SqlConnection(_connString))
                 {
                     conn.Open();
-                    return await conn.QueryAsync<T>(query);
+                    return await conn.QueryAsync<T>(query, parameters);
                 }
             }
             catch (Exception error)

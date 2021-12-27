@@ -16,7 +16,7 @@ namespace Cko.PaymentGateway.Repository
 
         public async Task<Merchant> GetMerchantByIdentifier(int merchantId)
         {
-            var r = await Get("select top 1 * from Merchant where MerchantId = @merchantId", new { MerchantId = merchantId });
+            var r = await Get("select top 1 * from Merchant where MerchantId = @MerchantId", new { MerchantId = merchantId });
             return r.FirstOrDefault();
         }
 
