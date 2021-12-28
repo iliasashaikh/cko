@@ -80,9 +80,8 @@ namespace Cko.PaymentGateway.IntegrationTests2
             await _paymentRepo.Run("Truncate table Payment");
             await _customerRepo.Run("Truncate table Customer");
             await _bankRepo.Run("Truncate table Bank");
-            await _paymentCardRepo.Run("Truncated table PaymentCard");
+            await _paymentCardRepo.Run("Truncate table PaymentCard");
         }
-
 
         [Test]
         public async Task Test_PaymentWithEmptyPaymentRequest()

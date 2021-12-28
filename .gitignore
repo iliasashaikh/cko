@@ -258,8 +258,10 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
-!cko.mdf
-!cko.ldf
+!cko*.mdf
+!cko*.ldf
+!cko_testing*.mdf
+!cko_testing*.ldf
 
 # Business Intelligence projects
 *.rdl.data
