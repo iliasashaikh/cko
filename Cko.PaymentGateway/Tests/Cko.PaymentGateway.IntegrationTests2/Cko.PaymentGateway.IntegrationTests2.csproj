@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="coverlet.collector" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Api\Cko.PaymentGateway.Api.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Entities\Cko.PaymentGateway.Entities.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Models\Cko.PaymentGateway.Models.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Repository\Cko.PaymentGateway.Repository.csproj" />
+    <ProjectReference Include="..\..\Cko.PaymentGateway.Services\Cko.PaymentGateway.Services.csproj" />
+  </ItemGroup>
+
+</Project>

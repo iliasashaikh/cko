@@ -24,7 +24,7 @@ try
         options.SwaggerDoc("v1", new OpenApiInfo
         {
             Version = "v1",
-            Title = "Pay faster => => with Checkout.com",
+            Title = "Pay faster.....with Checkout.com",
             Description = "Checkout API Built with .NET Core 6",
         });
     });
@@ -73,3 +73,4 @@ finally
     Log.CloseAndFlush();
 }
 
+public partial class Program { }

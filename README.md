@@ -1,4 +1,20 @@
-﻿# Checkout payment gateway
+﻿- [Checkout payment gateway](#checkout-payment-gateway)
+  - [Build](#build)
+  - [Database](#database)
+    - [DataModel](#datamodel)
+    - [Data Access](#data-access)
+  - [Projects](#projects)
+    - [Gateway API](#gateway-api)
+    - [Bank Simulator](#bank-simulator)
+    - [Testing](#testing)
+      - [**Unit Tests**](#unit-tests)
+      - [**Integrations Tests**](#integrations-tests)
+  - [Key External Libraries](#key-external-libraries)
+  - [Design decisions](#design-decisions)
+  - [Data flow](#data-flow)
+  - [Areas for improvement](#areas-for-improvement)
+
+# Checkout payment gateway
 
 ## Build 
 
@@ -19,10 +35,10 @@
 
 
 ## Database
-- I have used a Sql server database 
-- The database is included in the repository and consists of
+- I have used a Sql server single file database. This choice was basically to make it easier to ship the database in this demo app and is included in the repository and consists of
   - Cko.PaymentGateway\Db\cko.mdf
   - Cko.PaymentGateway\Db\cko.ldf
+> Although the database doesn't need a full fledged database, it is necessary to have a Sql runtime for LocalDb. This can be installed from [SqlLocalDb](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb?redirectedfrom=MSDN&view=sql-server-ver15)
 
 ### DataModel
 
@@ -40,7 +56,7 @@
 - Customer
   - Stores customer details
 
-### Data acess
+### Data Access
 - All dataaccess is via 'Repositories' using the `Repository` pattern.
 - Uses `Dapper` as a micro-orm
   
@@ -61,11 +77,19 @@
 
 
 ### Bank Simulator
+This is a very simple .NET 6 API built using the new `Minimal API` syntax, with hard coded responses.
+The project is included in the solution.
 - MyBank.API
 
-### Tests
+### Testing
+
+#### **Unit Tests**
+Unit testing uses NUnit.
+- test/Cko.PaymentGateway.UnitTests
+
+#### **Integrations Tests**
+Integration tests make use of the `WebApplicationFactory` to create an in-memory web server. The integration tests are in the project
 - test/Cko.PaymentGateway.IntegrationTests
-- Cko.PaymentGateway.UnitTests
 
 ## Key External Libraries
 - Refit - http client factory & used for Bank Sdk
