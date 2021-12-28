@@ -13,4 +13,6 @@ namespace Cko.PaymentGateway.Models
         [Post("/pay")]
         Task<BankPaymentResponse> ProcessPayment([Body] BankPaymentRequest paymentRequest);
     }
+
+
 }

@@ -1,12 +1,29 @@
-﻿using Cko.PaymentGateway.Models;
+﻿using AutoMapper;
+using Cko.PaymentGateway.Models;
 using Cko.PaymentGateway.Repository;
 using Cko.PaymentGateway.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NUnit.Framework;
+using Refit;
 
 namespace Cko.PaymentGateway.UnitTests
 {
+
+    public class BankSdkUnitTest : IBankSdk
+    {
+        public async Task<BankPaymentResponse> ProcessPayment([Body] BankPaymentRequest paymentRequest)
+        {
+            var response = new BankPaymentResponse();
+
+            response.Message = "Test";
+            response.PaymentReference = Guid.NewGuid();
+            response.BankReponseCode = 0;
+
+            return await Task.Run(() => response);
+        }
+    }
+
     [TestFixture]
     public class PaymentProcesorUnitTests
     {
@@ -27,9 +44,11 @@ namespace Cko.PaymentGateway.UnitTests
             var customerRepository = Substitute.For<CustomerRepository>();
             var paymentCardRepository = Substitute.For<PaymentCardRepository>();
             var merchantRepository = Substitute.For<MerchantRepository>();
+            Func<string, IBankSdk> funcBank = (u) => new BankSdkUnitTest();
+            var mockMapper = Substitute.For<IMapper>();
 
             return (
-                    new PaymentProcessor(logger, paymentRepository, bankRepository, customerRepository, paymentCardRepository, merchantRepository),
+                    new PaymentProcessor(logger, paymentRepository, bankRepository, customerRepository, paymentCardRepository, merchantRepository,funcBank,mockMapper),
                     logger,
                     paymentRepository,
                     bankRepository,

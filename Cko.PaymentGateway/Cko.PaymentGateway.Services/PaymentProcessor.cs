@@ -25,6 +25,7 @@ namespace Cko.PaymentGateway.Services
         private readonly CustomerRepository _customerRepository;
         private readonly PaymentCardRepository _paymentCardRepository;
         private readonly MerchantRepository _merchantRepository;
+        private readonly Func<string, IBankSdk> _bankFunc;
         private readonly IMapper _mapper;
 
         public PaymentProcessor(ILogger<PaymentProcessor> logger,
@@ -33,6 +34,7 @@ namespace Cko.PaymentGateway.Services
                                 CustomerRepository customerRepository,
                                 PaymentCardRepository paymentCardRepository,
                                 MerchantRepository merchantRepository,
+                                Func<string, IBankSdk> bankFunc,
                                 IMapper mapper)
         {
             this._logger = logger;
@@ -41,6 +43,7 @@ namespace Cko.PaymentGateway.Services
             this._customerRepository = customerRepository;
             this._paymentCardRepository = paymentCardRepository;
             this._merchantRepository = merchantRepository;
+            this._bankFunc = bankFunc;
             this._mapper = mapper;
         }
 
@@ -55,7 +58,6 @@ namespace Cko.PaymentGateway.Services
             (payment.State, payment.PaymentInfo) = (state, info);
             _ = await _paymentRepository.Update(payment);
         }
-        
 
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
@@ -145,7 +147,8 @@ namespace Cko.PaymentGateway.Services
 
                 var bankPaymentReq = MakeBankPaymentRequest(paymentCard);
 
-                var banksdk = RestService.For<IBankSdk>(bank.BankApiUrl);
+                var banksdk = _bankFunc(bank.BankApiUrl);
+                //var banksdk = RestService.For<IBankSdk>(bank.BankApiUrl);
 
                 var bankResponse = await banksdk.ProcessPayment(bankPaymentReq);
                 if (bankResponse.BankReponseCode == 0)

@@ -4,7 +4,6 @@ using Cko.PaymentGateway.Services;
 using Microsoft.OpenApi.Models;
 using Refit;
 using Serilog;
-using Scrutor;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -30,14 +29,16 @@ try
     });
 
     builder.Services.AddScoped<IPaymentProcessor, PaymentProcessor>();
-    builder.Services.AddRefitClient<IBankSdk>();
+
+    Func<string, IBankSdk> f = (url) => RestService.For<IBankSdk>(url);
+    builder.Services.AddScoped<Func<string, IBankSdk>>((s) => f);
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-   builder.Services.Scan(scan => scan
-  .FromAssemblyOf<PaymentRepository>()
-    .AddClasses()
-      .AsSelf()
-      .WithTransientLifetime());
+    builder.Services.Scan(scan => scan
+   .FromAssemblyOf<PaymentRepository>()
+     .AddClasses()
+       .AsSelf()
+       .WithTransientLifetime());
 
     // Add Serilog
     builder.Host.UseSerilog((ctx, lc) =>
