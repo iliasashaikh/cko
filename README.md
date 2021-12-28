@@ -19,10 +19,14 @@
 ## Build 
 
 - The solution is developed in .NET 6/ Visual Studio 2022
-- To build and run
+- **To build and run**
   - Ensure that you have the .NET 6 runtime and SDK on your machine
   - **Clone the repository** from 
-    - https://github.com/iliasashaikh/cko.git 
+    - https://github.com/iliasashaikh/cko.git
+  - The solution includes Sql database files that can be attached to an instance of LocalDB. The location of the db files may need updating in the config.
+  - Open the file `(repoRoot)\Cko.PaymentGateway\Cko.PaymentGateway.Api\appsettings.json`
+  - Update the setting for connection string by replacing `c:\\dev\\cko\\` to the local repo folder.
+  - Similarly, update the setting for the integration testing db at `(repoRoot)\Cko.PaymentGateway\Tests\Cko.PaymentGateway.IntegrationTests2\appsettings.json`
   - **To run the Payment Gateway API** 
     - open console and `cd` the to cloned directory
     - Now type `cd Cko.PaymentGateway`
@@ -31,7 +35,7 @@
   - To run the Banking simulator
     - open another console and `cd` to the cloned directory
     - Now type `cd Cko.PaymentGateway`
-    - `dotnet run .\MyBank.Api\MyBank.Api.csproj`
+    - `dotnet run --project .\MyBank.Api\MyBank.Api.csproj`
 
 
 ## Database
@@ -130,4 +134,5 @@ Although this is a fairly simple project and solution I have tried to follow som
 - **Authentication/ Authorisation** - Ideally I would have liked to implement authentication & authorisation, either storing credentials in the  database and use ASP.NET Core Identity. Not sure how appropriate it would be to use external providers like Google, Microsoft etc.
 - **HTTPS** - The APIs are hosted over Http. It would be fairly simple to set the APIs up for https, but it would have added to the complexity of running the code.
 - To improve resilience in production code, I would ideally incorporate the library Polly.NET.
+- **Container/ Docker** - Package the entire solution with sql server in a docker container.
 

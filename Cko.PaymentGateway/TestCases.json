@@ -1,0 +1,17 @@
+Test cases 
+
+{
+    "customerName": "John",
+    "customerAddress": "Doe",
+    "customerReference": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "cardNumber": "5555555555554444",
+    "cvv": "1234",
+    "cardExpiry": "2022-12-28T13:53:46.844Z",
+    "bankIdentifierCode": "hsbc",
+    "saveCustomerDetails": true,
+    "itemDetails": "something bought",
+    "amount": 10,
+    "ccy": "usd",
+    "merchantId": 10,
+    "merchantName": "amazon"
+}

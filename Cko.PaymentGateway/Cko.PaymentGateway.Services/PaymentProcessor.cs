@@ -1,4 +1,5 @@
-﻿using Cko.PaymentGateway.Entities;
+﻿using AutoMapper;
+using Cko.PaymentGateway.Entities;
 using Cko.PaymentGateway.Models;
 using Cko.PaymentGateway.Repository;
 using Microsoft.Extensions.Logging;
@@ -24,13 +25,15 @@ namespace Cko.PaymentGateway.Services
         private readonly CustomerRepository _customerRepository;
         private readonly PaymentCardRepository _paymentCardRepository;
         private readonly MerchantRepository _merchantRepository;
+        private readonly IMapper _mapper;
 
         public PaymentProcessor(ILogger<PaymentProcessor> logger,
                                 PaymentRepository paymentRepository,
                                 BankRepository bankRepository,
                                 CustomerRepository customerRepository,
                                 PaymentCardRepository paymentCardRepository,
-                                MerchantRepository merchantRepository)
+                                MerchantRepository merchantRepository,
+                                IMapper mapper)
         {
             this._logger = logger;
             this._paymentRepository = paymentRepository;
@@ -38,6 +41,7 @@ namespace Cko.PaymentGateway.Services
             this._customerRepository = customerRepository;
             this._paymentCardRepository = paymentCardRepository;
             this._merchantRepository = merchantRepository;
+            this._mapper = mapper;
         }
 
         public async Task<Payment> GetPaymentDetails(string paymentReference)
@@ -46,12 +50,29 @@ namespace Cko.PaymentGateway.Services
             return payment;
         }
 
+        private async Task UpdatePaymentState(Payment payment, PaymentState state, string info)
+        {
+            (payment.State, payment.PaymentInfo) = (state, info);
+            _ = await _paymentRepository.Update(payment);
+        }
+        
+
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
+            _logger.LogDebug("Received {@paymentRequest}", paymentRequest);
+
             PaymentResponse? paymentResponse = new PaymentResponse();
+
+            // create a new Payment object
+            var payment = _mapper.Map<Payment>(paymentRequest);
+            var paymentId = await _paymentRepository.Insert(payment);
+
+            _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
 
             // Create a payment entity from the request, we will then validate using the Entity
             var (valid, validationMessage) = IsValid(paymentRequest);
+            payment.State = PaymentState.Validated;
+
             if (valid)
             {
                 var merchant = await _merchantRepository.GetMerchantByIdentifier(paymentRequest.MerchantId);
@@ -59,6 +80,8 @@ namespace Cko.PaymentGateway.Services
                 {
                     paymentResponse.Status = PaymentResponseStatus.Rejected_MerchantNotFound;
                     paymentResponse.PaymentResponseMessage = $"The supplied Merchant with Id = {paymentRequest.MerchantId} not found";
+
+                    await UpdatePaymentState(payment,PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
                     return paymentResponse;
                 }
 
@@ -72,9 +95,13 @@ namespace Cko.PaymentGateway.Services
 
                     if (customer == null)
                     {
-                        paymentResponse.Status = PaymentResponseStatus.Rejected_CustomerNotFound;
+                        paymentResponse.Status = PaymentResponseStatus.Bank_NotFound;
                         paymentResponse.PaymentResponseMessage = $"The supplied Customer with reference = {paymentRequest.CustomerReference} not found";
+
+                        await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
+
                         return paymentResponse;
+
                     }
                 }
 
@@ -105,6 +132,17 @@ namespace Cko.PaymentGateway.Services
 
                 var bankId = paymentRequest.BankIdentifierCode;
                 var bank = await _bankRepository.GetBankByIdentifier(bankId);
+
+                if (bank == null)
+                {
+                    paymentResponse.Status = PaymentResponseStatus.Bank_NotFound;
+                    paymentResponse.PaymentResponseMessage = $"The supplied Bank with code = {paymentRequest.BankIdentifierCode} not found";
+
+                    await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
+
+                    return paymentResponse;
+                }
+
                 var bankPaymentReq = MakeBankPaymentRequest(paymentCard);
 
                 var banksdk = RestService.For<IBankSdk>(bank.BankApiUrl);
@@ -114,17 +152,23 @@ namespace Cko.PaymentGateway.Services
                 {
                     paymentResponse.Status = PaymentResponseStatus.Approved;
                     paymentResponse.PaymentResponseMessage = "Payment processed";
+
+                    await UpdatePaymentState(payment, PaymentState.Approved, paymentResponse.PaymentResponseMessage);
                 }
                 else
                 {
                     paymentResponse.Status = PaymentResponseStatus.Rejected_DeclinedByBank;
                     paymentResponse.PaymentResponseMessage = bankResponse.Message;
+
+                    await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
                 }
             }
             else
             {
                 paymentResponse.Status = PaymentResponseStatus.Rejected_CardValidationFailed;
                 paymentResponse.PaymentResponseMessage = validationMessage;
+
+                await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
             }
 
             return paymentResponse;

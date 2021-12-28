@@ -13,7 +13,7 @@ namespace Cko.PaymentGateway.Models
         Validated,
         Approved,
         Rejected_MerchantNotFound,
-        Rejected_CustomerNotFound,
+        Bank_NotFound,
         Rejected_CardValidationFailed,
         Rejected_DeclinedByBank
     }

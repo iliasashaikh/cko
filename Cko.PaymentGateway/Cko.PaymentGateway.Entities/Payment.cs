@@ -8,7 +8,6 @@ namespace Cko.PaymentGateway.Entities
     {
         [Key]
         public int PaymentId { get; set; }
-        public string PaymentReference { get; set; } = string.Empty;
         public Guid CustomerReference { get; set; }
         public int MerchantId { get; set; }
         public DateTime PaymentTime { get; set; }
@@ -18,6 +17,7 @@ namespace Cko.PaymentGateway.Entities
         public string ItemDetails { get; set; } = string.Empty;
         public PaymentState State { get; set; }
         public string PaymentInfo { get; set; } = string.Empty;
+        public int PaymentCardId { get; set; }
     }
 
     public enum PaymentState

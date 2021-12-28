@@ -23,11 +23,13 @@ namespace Cko.PaymentGateway.Models
         public string ItemDetails { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public string Ccy { get; set; } = string.Empty;
+        public DateTime PaymentTime { get; set; } = DateTime.UtcNow;
 
 
         // Merchant Details
         public int MerchantId { get; set; }
         public string MerchantName { get; set; } = string.Empty;
+
 
     }
 

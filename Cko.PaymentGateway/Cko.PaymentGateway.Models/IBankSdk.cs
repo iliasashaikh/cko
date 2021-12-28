@@ -10,7 +10,7 @@ namespace Cko.PaymentGateway.Models
 
     public interface IBankSdk
     {
-        [Post("/processpayment")]
+        [Post("/pay")]
         Task<BankPaymentResponse> ProcessPayment([Body] BankPaymentRequest paymentRequest);
     }
 }

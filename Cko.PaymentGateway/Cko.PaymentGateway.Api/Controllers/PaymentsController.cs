@@ -31,7 +31,7 @@ namespace Cko.PaymentGateway.Controllers
                     case PaymentResponseStatus.Rejected_MerchantNotFound:
                         return NotFound(response);
 
-                    case PaymentResponseStatus.Rejected_CustomerNotFound:
+                    case PaymentResponseStatus.Bank_NotFound:
                         return NotFound(response);
 
                     case PaymentResponseStatus.Rejected_CardValidationFailed:
