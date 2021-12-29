@@ -48,7 +48,6 @@ Run both the API and Bank simulator
 
 - Open the swagger page by browsing to http://localhost:5678/swagger/index.html 
 - To create a new `Payment` Post this `PaymentRequest` to `/api/Payments`
-
 ```  
  {
      "customerName": "John",
@@ -66,6 +65,7 @@ Run both the API and Bank simulator
      "merchantName": "amazon"
  }
 ```    
+![image](https://user-images.githubusercontent.com/196512/147667790-61bc3551-0c83-4d03-a3f4-6b017682118e.png)
 
 This should 
 - create a new Payment and Customer in the `Cko` database
@@ -73,8 +73,15 @@ This should
 - process payment and return a response with a Guid `PaymentReference` and int `PaymentId`
 - Make a note of the `PaymentId` returned 
 
+![image](https://user-images.githubusercontent.com/196512/147667887-d8991b53-ff7a-484d-a533-984d80237113.png)
+
+
 **Return payment details**
 - Payment details can be retrieved from /api/{PaymentId}
+![image](https://user-images.githubusercontent.com/196512/147667925-8e3042af-0f78-48c9-a137-78464a21681e.png)
+
+Response
+![image](https://user-images.githubusercontent.com/196512/147667970-3c276271-9011-46dc-8a90-e34db1b92f49.png)
 
 
 ## Database
