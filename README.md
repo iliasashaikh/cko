@@ -86,8 +86,8 @@ Response
 
 ## Database
 - I have used a Sql server single file database. This choice was basically to make it easier to ship the database in this demo app and is included in the repository and consists of
-  - Cko.PaymentGateway\Db\cko.mdf
-  - Cko.PaymentGateway\Db\cko.ldf
+  - Cko.PaymentGateway\Db\Prod\cko.mdf
+  - Cko.PaymentGateway\Db\Prod\cko.ldf
 > Although the database doesn't need a full fledged database, it is necessary to have a Sql runtime for LocalDb. This can be installed from [SqlLocalDb](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb?redirectedfrom=MSDN&view=sql-server-ver15)
 
 ### DataModel
