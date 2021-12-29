@@ -13,6 +13,8 @@ namespace Cko.PaymentGateway.Entities
         public DateTime PaymentTime { get; set; }
         public decimal Amount { get; set; }
         public string Ccy { get; set; } = string.Empty;
+
+        [Computed]
         public DateTime CreatedTime { get; set; }
         public string ItemDetails { get; set; } = string.Empty;
         public PaymentState State { get; set; }

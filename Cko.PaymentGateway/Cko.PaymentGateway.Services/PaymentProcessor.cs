@@ -62,18 +62,17 @@ namespace Cko.PaymentGateway.Services
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
             _logger.LogDebug("Received {@paymentRequest}", paymentRequest);
-
             PaymentResponse? paymentResponse = new PaymentResponse();
-
-            // create a new Payment object
-            var payment = _mapper.Map<Payment>(paymentRequest);
-            var paymentId = await _paymentRepository.Insert(payment);
-
-            _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
 
             // Create a payment entity from the request, we will then validate using the Entity
             var (valid, validationMessage) = IsValid(paymentRequest);
+
+            // create a new Payment object
+            var payment = _mapper.Map<Payment>(paymentRequest);
             payment.State = PaymentState.Validated;
+            var paymentId = await _paymentRepository.Insert(payment);
+
+            _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
 
             if (valid)
             {
