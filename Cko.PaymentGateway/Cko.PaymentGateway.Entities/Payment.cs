@@ -28,6 +28,7 @@ namespace Cko.PaymentGateway.Entities
         Validated,
         SentToBank,
         Approved,
-        Rejected
+        Rejected,
+        UnableToConnectToBank
     }
 }

@@ -18,7 +18,8 @@
 
 ## Build 
 
-- The solution is developed in .NET 6/ Visual Studio 2022
+The solution is developed in **.NET 6**/ **Visual Studio 2022**
+
 - **To build and run**
   - Ensure that you have the .NET 6 runtime and SDK on your machine
   - **Clone the repository** from 
@@ -32,7 +33,7 @@
     - Now type `cd Cko.PaymentGateway`
     - ` dotnet run --project .\Cko.PaymentGateway.Api\Cko.PaymentGateway.Api.csproj`
     - Open http://localhost:5678/swagger/index.html in your browser to see the API documentation
-  - To run the Banking simulator
+  - **To run the Banking simulator**
     - open another console and `cd` to the cloned directory
     - Now type `cd Cko.PaymentGateway`
     - `dotnet run --project .\MyBank.Api\MyBank.Api.csproj`
@@ -88,23 +89,25 @@ The project is included in the solution.
 ### Testing
 
 #### **Unit Tests**
-Unit testing uses NUnit.
+Unit testing uses NUnit and use NSubstitute for mocking all Db and external API calls
 - test/Cko.PaymentGateway.UnitTests
 
 #### **Integrations Tests**
 Integration tests make use of the `WebApplicationFactory` to create an in-memory web server. The integration tests are in the project
-- test/Cko.PaymentGateway.IntegrationTests
+- test\Cko.PaymentGateway.IntegrationTests2
+- Tests use a copy of the database on the `db\Test` folder
+- All tests clear down the database before running and populate data as necessary
 
 ## Key External Libraries
-- Refit - http client factory & used for Bank Sdk
-- Dapper - fast data access
-- Serilog - logging framework
-- FluentValidation
-- NUnit - testing
-- Swashbuckle - Swagger API documentation
-- AutoMapper
-- NSubstitute - Mocking framework to mock dependencies for unit tests
-- Scrutor - to scan and register with DI container
+- **Refit** - http client factory & used for Bank Sdk
+- **Dapper** - fast data access
+- **Serilog** - logging framework
+- **FluentValidation** - for validation
+- **NUnit** - testing
+- **Swashbuckle** - Swagger API documentation
+- **AutoMapper**
+- **NSubstitute** - Mocking framework to mock dependencies for unit tests
+- **Scrutor** - to scan and register with DI container
 
 ## Design decisions
 

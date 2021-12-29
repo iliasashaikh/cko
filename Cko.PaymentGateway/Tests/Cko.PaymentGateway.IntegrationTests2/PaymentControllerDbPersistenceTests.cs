@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Cko.PaymentGateway.Entities;
 
 namespace Cko.PaymentGateway.IntegrationTests2
 {
@@ -57,7 +58,8 @@ namespace Cko.PaymentGateway.IntegrationTests2
                                             b.AddJsonFile(configPath);
                                         });
 
-                                        builder.ConfigureTestServices(services => {
+                                        builder.ConfigureTestServices(services =>
+                                        {
                                             services.AddScoped<Func<string, IBankSdk>>(s => (u) => new BankSdkIntTest());
                                         });
 
@@ -88,7 +90,7 @@ namespace Cko.PaymentGateway.IntegrationTests2
         {
             var paymentReq = new PaymentRequest();
             var response = await _client.PostAsJsonAsync("api/Payments", paymentReq);
-            Assert.AreEqual(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Test]
@@ -110,21 +112,48 @@ namespace Cko.PaymentGateway.IntegrationTests2
             var id = await _merchantRepo.Insert(new Entities.Merchant() { Name = "Amazon", Address = "The Amazon" });
             var custId = await _customerRepo.Insert(new Entities.Customer() { CustomerName = "John Smith", CustomerAddress = "1 street", CustomerReference = custRef });
             var paymentCardId = await _paymentCardRepo.Insert(new Entities.PaymentCard { BankIdentifierCode = "hsbc", CardExpiry = DateTime.Today.AddYears(3), CardNumber = "5555555555554444", CustomerReference = custRef, CustomerName = "John Smith", CustomerAddress = "1 street", Cvv = "123" });
+            var bankId = await _bankRepo.Insert(new Entities.Bank { BankName = "hsbc",BankIdentifier = "hsbc", BankApiUrl="apiurl"});
 
             var paymentReq = new PaymentRequest()
             {
                 MerchantId = id,
                 CustomerReference = custRef,
                 Amount = 10,
-                Cvv = "GBP",
+                Ccy = "GBP",
                 PaymentTime = DateTime.Today,
+            };
+            var response = await _client.PostAsJsonAsync("api/Payments", paymentReq);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
 
+        [Test]
+        public async Task Test_PaymentWithValidMerchant_ValidPaymentDetails_WithoutCustomerReference()
+        {
+            var custRef = Guid.Empty;
+            var merchantId = await _merchantRepo.Insert(new Entities.Merchant() { Name = "Amazon", Address = "The Amazon" });
+            var bankId = await _bankRepo.Insert(new Entities.Bank { BankName = "hsbc", BankIdentifier = "hsbc", BankApiUrl = "apiurl" });
+
+            var paymentReq = new PaymentRequest()
+            {
+                MerchantId = merchantId,
+                CustomerReference = custRef,
+                Amount = 10,
+                Ccy = "GBP",
+                PaymentTime = DateTime.Today,
+                CardExpiry = DateTime.Today.AddYears(3),
+                CustomerName = "John Smith",
+                CustomerAddress = "1 street",
+                CardNumber = "5555555555554444",
+                Cvv = "123",
+                BankIdentifierCode = "hsbc"
 
             };
             var response = await _client.PostAsJsonAsync("api/Payments", paymentReq);
-            Assert.AreEqual(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+            var paymentResponse = await response.Content.ReadFromJsonAsync<PaymentResponse>();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var paymentReadback = await _client.GetFromJsonAsync<Payment>($"api/payments/{paymentResponse.PaymentId}");
+            Assert.IsNotNull(paymentReadback);  
         }
-
-
     }
 }

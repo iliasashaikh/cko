@@ -34,7 +34,7 @@ namespace Cko.PaymentGateway.Controllers
                         case PaymentResponseStatus.Rejected_MerchantNotFound:
                             return NotFound(response);
 
-                        case PaymentResponseStatus.Bank_NotFound:
+                        case PaymentResponseStatus.Rejected_BankNotFound:
                             return NotFound(response);
 
                         case PaymentResponseStatus.Rejected_CardValidationFailed:
@@ -65,7 +65,7 @@ namespace Cko.PaymentGateway.Controllers
                 return BadRequest(ModelState);
 
             var response = await _paymentProcessor.GetPaymentDetails(id);
-            return Ok(id);
+            return Ok(response);
         }
     }
 }
