@@ -21,9 +21,10 @@ namespace Cko.PaymentGateway.Repository
         {
         }
 
-        public async Task<Payment> GetPaymentDetails(string paymentReference)
+        public async Task<Payment> GetPaymentDetails(int paymentId)
         {
-            return await Task.Run(() => new Payment());
+            var r = await Get(@"select * from Payment where paymentId = @PaymentId", new { PaymentId = paymentId });
+            return r.FirstOrDefault();
         }
     }
 

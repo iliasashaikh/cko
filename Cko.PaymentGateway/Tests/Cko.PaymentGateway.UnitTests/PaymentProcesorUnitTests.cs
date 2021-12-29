@@ -123,16 +123,5 @@ namespace Cko.PaymentGateway.UnitTests
             Assert.IsEmpty(message);
         }
 
-        [Test]
-        public void Test_PayUsingEmptyCard()
-        {
-
-        }
-
-        [Test]
-        public void Test_PayUsingInvalidCard()
-        {
-
-        }
     }
 }

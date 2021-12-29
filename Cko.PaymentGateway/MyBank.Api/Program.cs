@@ -10,34 +10,20 @@ var app = builder.Build();
 
 //app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-       new WeatherForecast
-       (
-           DateTime.Now.AddDays(index),
-           Random.Shared.Next(-20, 55),
-           summaries[Random.Shared.Next(summaries.Length)]
-       ))
-        .ToArray();
-    return forecast;
-});
-
 app.MapPost("/pay",(BankPaymentRequest req)=>
 {
-    return req;
+    // check hard coded cases
+
+    if (req.CardExpiry < DateTime.Today)
+        return Results.BadRequest("Card Expired");
+
+    if (req.CardNumber == "4111111111111111")
+        return Results.BadRequest("Card blocked. Please contact your Bank to unblock");
+
+    var resp = new BankPaymentResponse { BankPaymentResponseMessage = "Payment Successful", BankReponseCode = 0, PaymentReference = Guid.NewGuid()};
+    return Results.Ok();
 }
 );
 
 
 app.Run();
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

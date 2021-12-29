@@ -11,7 +11,7 @@ namespace Cko.PaymentGateway.Services
     public interface IPaymentProcessor
     {
         Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest);
-        Task<Payment> GetPaymentDetails(string paymentReference);
+        Task<Payment> GetPaymentDetails(int paymentId);
     }
 
     /// <summary>
@@ -47,9 +47,9 @@ namespace Cko.PaymentGateway.Services
             this._mapper = mapper;
         }
 
-        public async Task<Payment> GetPaymentDetails(string paymentReference)
+        public async Task<Payment> GetPaymentDetails(int paymentId)
         {
-            var payment = await _paymentRepository.GetPaymentDetails(paymentReference);
+            var payment = await _paymentRepository.GetPaymentDetails(paymentId);
             return payment;
         }
 

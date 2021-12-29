@@ -1,7 +1,8 @@
 ﻿using Cko.PaymentGateway.Models;
 using Cko.PaymentGateway.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+
 
 namespace Cko.PaymentGateway.Controllers
 {
@@ -20,38 +21,50 @@ namespace Cko.PaymentGateway.Controllers
         [HttpPost]
         public async Task<IActionResult> Pay(PaymentRequest paymentRequest)
         {
-            try
+            if (ModelState.IsValid)
             {
-                var response = await _paymentProcessor.ProcessPayment(paymentRequest);
-                switch (response.Status)
+                try
                 {
-                    case PaymentResponseStatus.Approved:
-                        return Ok(response);
+                    var response = await _paymentProcessor.ProcessPayment(paymentRequest);
+                    switch (response.Status)
+                    {
+                        case PaymentResponseStatus.Approved:
+                            return Ok(response);
 
-                    case PaymentResponseStatus.Rejected_MerchantNotFound:
-                        return NotFound(response);
+                        case PaymentResponseStatus.Rejected_MerchantNotFound:
+                            return NotFound(response);
 
-                    case PaymentResponseStatus.Bank_NotFound:
-                        return NotFound(response);
+                        case PaymentResponseStatus.Bank_NotFound:
+                            return NotFound(response);
 
-                    case PaymentResponseStatus.Rejected_CardValidationFailed:
-                        return UnprocessableEntity(response);
+                        case PaymentResponseStatus.Rejected_CardValidationFailed:
+                            return UnprocessableEntity(response);
 
-                    case PaymentResponseStatus.Rejected_DeclinedByBank:
-                        return UnprocessableEntity(response);
-                    default:
-                        return BadRequest(response);
+                        case PaymentResponseStatus.Rejected_DeclinedByBank:
+                            return UnprocessableEntity(response);
+                        default:
+                            return BadRequest(response);
+                    }
                 }
+                catch (Exception error)
+                {
+                    return BadRequest(error.Message);
+                }
+
             }
-            catch (Exception error)
+            else
             {
-                return BadRequest(error.Message);
+                return BadRequest(ModelState);
             }
         }
 
         [HttpGet("{id}")]   // GET /api/Payments/xyz
-        public IActionResult GetPayment(string id)
+        public async Task<IActionResult> GetPayment(int id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _paymentProcessor.GetPaymentDetails(id);
             return Ok(id);
         }
     }
