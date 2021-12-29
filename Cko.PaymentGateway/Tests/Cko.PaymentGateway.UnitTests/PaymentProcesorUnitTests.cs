@@ -16,7 +16,7 @@ namespace Cko.PaymentGateway.UnitTests
         {
             var response = new BankPaymentResponse();
 
-            response.Message = "Test";
+            response.BankPaymentResponseMessage = "Test";
             response.PaymentReference = Guid.NewGuid();
             response.BankReponseCode = 0;
 

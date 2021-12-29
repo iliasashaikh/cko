@@ -23,7 +23,7 @@ namespace Cko.PaymentGateway.IntegrationTests2
         {
             var response = new BankPaymentResponse();
 
-            response.Message = "Test";
+            response.BankPaymentResponseMessage = "Test";
             response.PaymentReference = Guid.NewGuid();
             response.BankReponseCode = 0;
 
