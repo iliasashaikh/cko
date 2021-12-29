@@ -20,8 +20,8 @@ namespace Cko.PaymentGateway.Models
 
     public class PaymentResponse
     {
-        public Guid PaymentReference { get; set; }
         public PaymentResponseStatus Status { get; set;} = PaymentResponseStatus.New;
         public string PaymentResponseMessage { get; set; } = string.Empty;
+        public int PaymentId { get; set; }
     }
 }
