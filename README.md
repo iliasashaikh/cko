@@ -15,6 +15,7 @@
   - [Areas for improvement](#areas-for-improvement)
 
 # Checkout payment gateway
+![image](https://user-images.githubusercontent.com/196512/147661511-f31701f0-8c03-4810-a380-cfdd9076ae46.png)
 
 ## Build 
 
@@ -37,7 +38,6 @@ The solution is developed in **.NET 6**/ **Visual Studio 2022**
     - open another console and `cd` to the cloned directory
     - Now type `cd Cko.PaymentGateway`
     - `dotnet run --project .\MyBank.Api\MyBank.Api.csproj`
-
 
 ## Database
 - I have used a Sql server single file database. This choice was basically to make it easier to ship the database in this demo app and is included in the repository and consists of
