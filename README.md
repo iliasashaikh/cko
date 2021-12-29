@@ -28,13 +28,13 @@ The solution is developed in **.NET 6**/ **Visual Studio 2022**
     - https://github.com/iliasashaikh/cko.git
   - The solution includes Sql database files that can be attached to an instance of LocalDB. The location of the db files may need updating in the config.
   - Open the file `(repoRoot)\Cko.PaymentGateway\Cko.PaymentGateway.Api\appsettings.json`
-  - Update the setting for connection string by replacing `c:\\dev\\cko\\` to the local repo folder.
+  - Update the setting for connection string for the database `CkoDb` by replacing `c:\\dev\\cko\\` to the local repo folder.
   - Similarly, update the setting for the integration testing db at `(repoRoot)\Cko.PaymentGateway\Tests\Cko.PaymentGateway.IntegrationTests2\appsettings.json`
   - **To run the Payment Gateway API** 
     - open console and `cd` the to cloned directory
     - Now type `cd Cko.PaymentGateway`
     - ` dotnet run --project .\Cko.PaymentGateway.Api\Cko.PaymentGateway.Api.csproj`
-    - Open http://localhost:5678/swagger/index.html in your browser to see the API documentation
+    - Open http://localhost:5678/index.html in your browser to see the API documentation
   - **To run the Banking simulator**
     - open another console and `cd` to the cloned directory
     - Now type `cd Cko.PaymentGateway`
@@ -46,7 +46,7 @@ Run both the API and Bank simulator
 
 **Create a payment**
 
-- Open the swagger page by browsing to http://localhost:5678/swagger/index.html 
+- Open the swagger page by browsing to http://localhost:5678/index.html 
 - To create a new `Payment` Post this `PaymentRequest` to `/api/Payments`
 ```  
  {
@@ -174,7 +174,7 @@ Although this is a fairly simple project and solution I have tried to follow som
 - It is expected that the Merchant has been setup in the system previously and the request includes a valid `MerchantId` that is present in the Checkout Db.
 - The customer details can be looked up from the database if a GUID for a customer is passed in, else the payment request should contain all customer details necessary.
 - The merchant can ask for the customer details to be saved, in which case they are saved and the response includes a generated customer reference.
-- All dataaccess uses the 
+- All dataaccess is via Repositories
 
 
 ## Areas for improvement
@@ -182,5 +182,5 @@ Although this is a fairly simple project and solution I have tried to follow som
 - **Authentication/ Authorisation** - Ideally I would have liked to implement authentication & authorisation, either storing credentials in the  database and use ASP.NET Core Identity. Not sure how appropriate it would be to use external providers like Google, Microsoft etc.
 - **HTTPS** - The APIs are hosted over Http. It would be fairly simple to set the APIs up for https, but it would have added to the complexity of running the code.
 - To improve resilience in production code, I would ideally incorporate the library Polly.NET.
-- **Container/ Docker** - Package the entire solution with sql server in a docker container.
+- **Container/ Docker** - I could have packaged the entire solution with full sql server in a Docker container.
 
