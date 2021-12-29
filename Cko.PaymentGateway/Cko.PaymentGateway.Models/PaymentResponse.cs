@@ -24,5 +24,6 @@ namespace Cko.PaymentGateway.Models
         public PaymentResponseStatus Status { get; set;} = PaymentResponseStatus.New;
         public string PaymentResponseMessage { get; set; } = string.Empty;
         public int PaymentId { get; set; }
+        public Guid PaymentReference { get; set; }
     }
 }

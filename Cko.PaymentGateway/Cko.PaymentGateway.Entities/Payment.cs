@@ -20,6 +20,7 @@ namespace Cko.PaymentGateway.Entities
         public PaymentState State { get; set; }
         public string PaymentInfo { get; set; } = string.Empty;
         public int PaymentCardId { get; set; }
+        public Guid PaymentReference { get; set; }
     }
 
     public enum PaymentState

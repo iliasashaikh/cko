@@ -13,5 +13,7 @@ namespace Cko.PaymentGateway.Models
         public string CustomerName { get; set; }
         public string CustomerAddress { get; set; }
         public string Cvv { get; set; }
+        public DateTime CardExpiry { get; set; }
+
     }
 }

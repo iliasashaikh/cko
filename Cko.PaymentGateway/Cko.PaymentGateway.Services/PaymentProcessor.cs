@@ -136,7 +136,11 @@ namespace Cko.PaymentGateway.Services
             {
                 if (paymentRequest.CustomerReference == Guid.Empty)
                 {
-                    customer.CustomerReference = Guid.NewGuid();
+                    var custRef = Guid.NewGuid();
+                    customer.CustomerReference = custRef;
+                    payment.CustomerReference = custRef;
+                    paymentCard.CustomerReference = custRef;
+
                     await _customerRepository.Insert(customer);
                     await _paymentCardRepository.Insert(paymentCard);
                 }
@@ -185,13 +189,15 @@ namespace Cko.PaymentGateway.Services
             {
                 paymentResponse.Status = PaymentResponseStatus.Approved;
                 paymentResponse.PaymentResponseMessage = "Payment processed";
+                paymentResponse.PaymentReference = bankResponse.PaymentReference;
+                payment.PaymentReference = bankResponse.PaymentReference;
 
                 await UpdatePaymentState(payment, PaymentState.Approved, paymentResponse.PaymentResponseMessage);
             }
             else
             {
                 paymentResponse.Status = PaymentResponseStatus.Rejected_DeclinedByBank;
-                paymentResponse.PaymentResponseMessage = bankResponse.Message;
+                paymentResponse.PaymentResponseMessage = bankResponse.BankPaymentResponseMessage;
 
                 await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
             }
@@ -205,6 +211,7 @@ namespace Cko.PaymentGateway.Services
             bankReq.CardNumber = paymentCard.CardNumber;
             bankReq.CustomerAddress = paymentCard.CustomerAddress;
             bankReq.Cvv = paymentCard.Cvv;
+            bankReq.CardExpiry = paymentCard.CardExpiry;
 
             return bankReq;
         }
