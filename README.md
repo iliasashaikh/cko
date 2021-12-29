@@ -1,5 +1,6 @@
 ﻿- [Checkout payment gateway](#checkout-payment-gateway)
   - [Build](#build)
+    - [Sample](#sample)
   - [Database](#database)
     - [DataModel](#datamodel)
     - [Data Access](#data-access)
@@ -38,6 +39,43 @@ The solution is developed in **.NET 6**/ **Visual Studio 2022**
     - open another console and `cd` to the cloned directory
     - Now type `cd Cko.PaymentGateway`
     - `dotnet run --project .\MyBank.Api\MyBank.Api.csproj`
+
+### Sample
+
+Run both the API and Bank simulator
+
+**Create a payment**
+
+- Open the swagger page by browsing to http://localhost:5678/swagger/index.html 
+- To create a new `Payment` Post this `PaymentRequest` to `/api/Payments`
+
+```  
+ {
+     "customerName": "John",
+     "customerAddress": "Doe",
+     "customerReference": "00000000-0000-0000-0000-000000000000",
+     "cardNumber": "5555555555554444",
+     "cvv": "1234",
+     "cardExpiry": "2022-12-28T13:53:46.844Z",
+     "bankIdentifierCode": "hsbc",
+     "saveCustomerDetails": true,
+     "itemDetails": "something bought",
+     "amount": 10,
+     "ccy": "usd",
+     "merchantId": 1,
+     "merchantName": "amazon"
+ }
+```    
+
+This should 
+- create a new Payment and Customer in the `Cko` database
+- make a call to the Bank simulator 
+- process payment and return a response with a Guid `PaymentReference` and int `PaymentId`
+- Make a note of the `PaymentId` returned 
+
+**Return payment details**
+- Payment details can be retrieved from /api/{PaymentId}
+
 
 ## Database
 - I have used a Sql server single file database. This choice was basically to make it easier to ship the database in this demo app and is included in the repository and consists of
