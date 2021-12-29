@@ -8,7 +8,7 @@ using Refit;
 namespace Cko.PaymentGateway.Services
 {
 
-    public interface IPaymentProcessor
+    public interface IPaymentProcessor2
     {
         Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest);
         Task<Payment> GetPaymentDetails(int paymentId);
@@ -17,7 +17,7 @@ namespace Cko.PaymentGateway.Services
     /// <summary>
     /// Payment processor service. Processes, stores and retrieves payments 
     /// </summary>
-    public class PaymentProcessor : IPaymentProcessor
+    public class PaymentProcessor2 : IPaymentProcessor2
     {
         private readonly ILogger<PaymentProcessor> _logger;
         private readonly PaymentRepository _paymentRepository;
@@ -26,15 +26,23 @@ namespace Cko.PaymentGateway.Services
         private readonly PaymentCardRepository _paymentCardRepository;
         private readonly MerchantRepository _merchantRepository;
         private readonly Func<string, IBankSdk> _bankFunc;
+
+        private readonly PaymentValidator _paymentValidator;
+        private readonly PaymentPersistor _paymentPersistor;
+        private readonly BankInterface _bankInterface;
         private readonly IMapper _mapper;
 
-        public PaymentProcessor(ILogger<PaymentProcessor> logger,
+        public PaymentProcessor2(ILogger<PaymentProcessor> logger,
                                 PaymentRepository paymentRepository,
                                 BankRepository bankRepository,
                                 CustomerRepository customerRepository,
                                 PaymentCardRepository paymentCardRepository,
                                 MerchantRepository merchantRepository,
                                 Func<string, IBankSdk> bankFunc,
+
+                                PaymentValidator paymentValidator,
+                                PaymentPersistor paymentPersistor,
+                                BankInterface bankInterface,
                                 IMapper mapper)
         {
             this._logger = logger;
@@ -44,6 +52,9 @@ namespace Cko.PaymentGateway.Services
             this._paymentCardRepository = paymentCardRepository;
             this._merchantRepository = merchantRepository;
             this._bankFunc = bankFunc;
+            this._paymentValidator = paymentValidator;
+            this._paymentPersistor = paymentPersistor;
+            this._bankInterface = bankInterface;
             this._mapper = mapper;
         }
 
@@ -62,6 +73,22 @@ namespace Cko.PaymentGateway.Services
         public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
         {
             _logger.LogDebug("Received {@paymentRequest}", paymentRequest);
+            var payment = _mapper.Map<Payment>(paymentRequest);
+
+            await _paymentPersistor.SavePayment(payment);
+
+            PaymentResponse? paymentResponse = new PaymentResponse { PaymentId = paymentId };
+
+            (var valid, paymentResponse) = _paymentValidator.IsValid(paymentRequest, paymentResponse);
+
+            if (!valid)
+            {
+                return paymentResponse;
+            }
+
+            await _paymentPersistor.SaveCustomerDetails(paymentRequest);
+            await _bankInteface.Pay(paymentCard);
+        }
 
             
 
@@ -69,10 +96,8 @@ namespace Cko.PaymentGateway.Services
             var payment = _mapper.Map<Payment>(paymentRequest);
             payment.State = PaymentState.Validated;
             var paymentId = await _paymentRepository.Insert(payment);
-            PaymentResponse? paymentResponse = new PaymentResponse { PaymentId = paymentId };
 
             _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
-
 
 
             var merchant = await _merchantRepository.GetMerchantByIdentifier(paymentRequest.MerchantId);
