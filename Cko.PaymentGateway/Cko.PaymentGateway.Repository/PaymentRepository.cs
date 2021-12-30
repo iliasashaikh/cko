@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Cko.PaymentGateway.Repository
 {
-    public class PaymentRepository : DapperRepository<Payment>
+    public class PaymentRepository : DapperRepository<Payment>, IPaymentRepository
     {
-        public PaymentRepository():this(null,null)
+        public PaymentRepository() : this(null, null)
         {
 
         }

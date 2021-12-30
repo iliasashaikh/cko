@@ -15,7 +15,7 @@ namespace Cko.PaymentGateway.Models
         // Card details
         public string CardNumber { get; set; } = string.Empty;
         public string Cvv { get; set; } = string.Empty;
-        public DateTime CardExpiry { get; set; } = DateTime.UtcNow.AddDays(-1);
+        public DateTime CardExpiry { get; set; } 
         public string BankIdentifierCode { get; set; } = string.Empty;
         public bool SaveCustomerDetails { get; set; }
 
@@ -39,7 +39,7 @@ namespace Cko.PaymentGateway.Models
         {
             RuleFor(p => p.Amount).NotEmpty().GreaterThan(0);
             RuleFor(p => p.Ccy).NotEmpty().Length(3);
-
+            RuleFor(p => p.CardExpiry).GreaterThan(DateTime.Today);
             RuleFor(p => p.MerchantId).NotEmpty();
 
             RuleFor(p => p.CustomerReference).NotEmpty()
@@ -51,7 +51,7 @@ namespace Cko.PaymentGateway.Models
                                                     string.IsNullOrEmpty(p.Cvv) ||
                                                     string.IsNullOrEmpty(p.BankIdentifierCode)
                                                     )
-                                                .WithMessage("All Customer and Card details should be filled in when Cusotmer reference is not provided");
+                                                .WithMessage("All Customer and Card details should be filled in when Customer reference is not provided");
 
             RuleFor(p => p.CustomerAddress).NotEmpty().When(p => p.CustomerReference == default(Guid));
             RuleFor(p => p.CustomerName).NotEmpty().When(p => p.CustomerReference == default(Guid));

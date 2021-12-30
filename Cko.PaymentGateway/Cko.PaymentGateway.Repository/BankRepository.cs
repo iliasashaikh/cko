@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Cko.PaymentGateway.Repository
 {
-    public class BankRepository : DapperRepository<Bank>
+    public class BankRepository : DapperRepository<Bank>, IBankRepository
     {
-        public BankRepository() : this(null,null)
+        public BankRepository() : this(null, null)
         {
 
         }

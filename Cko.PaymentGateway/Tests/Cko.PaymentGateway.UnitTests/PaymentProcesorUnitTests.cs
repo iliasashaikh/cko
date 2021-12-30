@@ -19,7 +19,7 @@ namespace Cko.PaymentGateway.UnitTests
             response.BankPaymentResponseMessage = "Test";
             response.PaymentReference = Guid.NewGuid();
             response.BankReponseCode = 0;
-
+           
             return await Task.Run(() => response);
         }
     }

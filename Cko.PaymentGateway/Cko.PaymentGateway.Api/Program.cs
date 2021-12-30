@@ -34,11 +34,17 @@ try
     builder.Services.AddScoped<Func<string, IBankSdk>>((s) => f);
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-    builder.Services.Scan(scan => scan
-   .FromAssemblyOf<PaymentRepository>()
-     .AddClasses()
-       .AsSelf()
-       .WithTransientLifetime());
+    builder.Services.Scan(scan => scan.FromAssemblyOf<PaymentRepository>()
+                                        .AddClasses()
+                                        .AsSelf()
+                                        .AsImplementedInterfaces()
+                                        .WithTransientLifetime());
+
+    builder.Services.Scan(scan => scan.FromAssemblyOf<PaymentProcessor>()
+                                        .AddClasses()
+                                        .AsSelf()
+                                        .AsImplementedInterfaces()
+                                        .WithTransientLifetime());
 
     // Add Serilog
     builder.Host.UseSerilog((ctx, lc) =>
