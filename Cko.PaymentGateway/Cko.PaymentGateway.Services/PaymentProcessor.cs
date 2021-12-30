@@ -8,14 +8,8 @@ using Refit;
 namespace Cko.PaymentGateway.Services
 {
 
-    public interface IPaymentProcessor
-    {
-        Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest);
-        Task<Payment> GetPaymentDetails(int paymentId);
-    }
-
     /// <summary>
-    /// Payment processor service. Processes, stores and retrieves payments 
+    /// Payment processor service. Processes, stores and retrieves payments
     /// </summary>
     public class PaymentProcessor : IPaymentProcessor
     {
@@ -63,8 +57,6 @@ namespace Cko.PaymentGateway.Services
         {
             _logger.LogDebug("Received {@paymentRequest}", paymentRequest);
 
-            
-
             // create a new Payment object
             var payment = _mapper.Map<Payment>(paymentRequest);
             payment.State = PaymentState.Validated;
@@ -72,8 +64,6 @@ namespace Cko.PaymentGateway.Services
             PaymentResponse? paymentResponse = new PaymentResponse { PaymentId = paymentId };
 
             _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
-
-
 
             var merchant = await _merchantRepository.GetMerchantByIdentifier(paymentRequest.MerchantId);
             if (merchant == null)
@@ -185,7 +175,7 @@ namespace Cko.PaymentGateway.Services
                 paymentResponse.Status = PaymentResponseStatus.Rejected_UnableToConnectToBank;
                 paymentResponse.PaymentResponseMessage = "Unable to connect to the bank";
 
-                await UpdatePaymentState(payment, PaymentState.UnableToConnectToBank, paymentResponse.PaymentResponseMessage);
+                await UpdatePaymentState(payment, PaymentState.PaymentFailed, paymentResponse.PaymentResponseMessage);
 
                 throw;
             }

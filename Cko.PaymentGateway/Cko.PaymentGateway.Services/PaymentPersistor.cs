@@ -1,11 +1,6 @@
 ﻿using Cko.PaymentGateway.Entities;
 using Cko.PaymentGateway.Models;
 using Cko.PaymentGateway.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cko.PaymentGateway.Services
 {
@@ -27,8 +22,31 @@ namespace Cko.PaymentGateway.Services
             this._paymentRepository = paymentRepository;
         }
 
-        public void SaveCustomerDetails(PaymentRequest paymentRequest)
+        public async Task SaveCustomerDetails(PaymentRequest paymentRequest, Customer customer, PaymentCard paymentCard)
         {
+            // fill in customer info from the payment Request
+            paymentCard.CardExpiry = paymentRequest.CardExpiry == default(DateTime) ? paymentCard.CardExpiry : paymentRequest.CardExpiry;
+            paymentCard.CardNumber = string.IsNullOrWhiteSpace(paymentRequest.CardNumber) ? paymentCard.CardNumber : paymentRequest.CardNumber;
+            paymentCard.CustomerAddress = string.IsNullOrWhiteSpace(paymentRequest.CustomerAddress) ? paymentCard.CustomerAddress : paymentRequest.CustomerAddress;
+            paymentCard.CustomerName = string.IsNullOrWhiteSpace(paymentRequest.CustomerName) ? paymentCard.CustomerName : paymentRequest.CustomerName;
+
+            customer.CustomerName = paymentRequest.CustomerName == default(string) ? customer.CustomerName : paymentRequest.CustomerName;
+            customer.CustomerAddress = paymentRequest.CustomerAddress == default(string) ? customer.CustomerAddress : paymentRequest.CustomerAddress;
+
+            if (paymentRequest.CustomerReference == Guid.Empty)
+            {
+                var custRef = Guid.NewGuid();
+                customer.CustomerReference = custRef;
+                paymentCard.CustomerReference = custRef;
+
+                await _customerRepository.Insert(customer);
+                await _paymentCardRepository.Insert(paymentCard);
+            }
+            else
+            {
+                await _customerRepository.Update(customer);
+                await _paymentCardRepository.Update(paymentCard);
+            }
 
         }
 

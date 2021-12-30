@@ -31,17 +31,15 @@ namespace Cko.PaymentGateway.Controllers
                         case PaymentResponseStatus.Approved:
                             return Ok(response);
 
-                        case PaymentResponseStatus.Rejected_MerchantNotFound:
-                            return NotFound(response);
-
-                        case PaymentResponseStatus.Rejected_BankNotFound:
-                            return NotFound(response);
-
-                        case PaymentResponseStatus.Rejected_CardValidationFailed:
+                        case PaymentResponseStatus.Rejected_ValidationFailed:
                             return UnprocessableEntity(response);
 
-                        case PaymentResponseStatus.Rejected_DeclinedByBank:
+                        case PaymentResponseStatus.Rejected_PaymentFailed:
                             return UnprocessableEntity(response);
+
+                        case PaymentResponseStatus.Rejected_UnableToConnectToBank:
+                            return UnprocessableEntity(response);
+
                         default:
                             return BadRequest(response);
                     }

@@ -12,11 +12,9 @@ namespace Cko.PaymentGateway.Models
         New,
         Validated,
         Approved,
-        Rejected_MerchantNotFound,
-        Rejected_BankNotFound,
-        Rejected_CardValidationFailed,
-        Rejected_DeclinedByBank,
-        Rejected_UnableToConnectToBank
+        Rejected_UnableToConnectToBank,
+        Rejected_ValidationFailed,
+        Rejected_PaymentFailed
     }
 
     public class PaymentResponse

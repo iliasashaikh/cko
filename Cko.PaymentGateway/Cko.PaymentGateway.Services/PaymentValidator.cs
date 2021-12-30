@@ -27,39 +27,50 @@ namespace Cko.PaymentGateway.Services
             this._paymentPersistor = paymentPersistor;
         }
 
-        internal async Task<(bool, PaymentResponse)> IsValidMerchant(Payment payment, PaymentRequest paymentRequest, PaymentResponse paymentResponse)
+        public async Task<(bool, PaymentResponse)> IsValidMerchant(PaymentRequest paymentRequest, PaymentResponse paymentResponse)
         {
             var merchant = await _merchantRepository.GetMerchantByIdentifier(paymentRequest.MerchantId);
             if (merchant == null)
             {
-                paymentResponse.Status = PaymentResponseStatus.Rejected_MerchantNotFound;
-                paymentResponse.PaymentResponseMessage = $"The supplied Merchant with Id = {paymentRequest.MerchantId} not found";
-
-                await _paymentPersistor.UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
+                paymentResponse.PaymentResponseMessage += $"The supplied Merchant with Id = {paymentRequest.MerchantId} not found.{Environment.NewLine}";
                 return (false,paymentResponse);
             }
 
-            return (false, paymentResponse);
+            return (true, paymentResponse);
         }
 
-        internal (bool, PaymentResponse) IsValidCustomer(PaymentRequest paymentRequest, PaymentResponse paymentResponse)
+        public async Task<(bool, PaymentResponse, Customer, PaymentCard)> IsValidCustomer(PaymentRequest paymentRequest, PaymentResponse paymentResponse)
         {
-            
+            bool valid = true;
+            Customer customer = null;
+            PaymentCard paymentCard = null;
+
+            // if customer ref has been supplied it should exist in the system
+            if (paymentRequest.CustomerReference != Guid.Empty)
+            {
+                customer = await _customerRepository.GetCustomerByReference(paymentRequest.CustomerReference);
+                paymentCard = await _paymentCardRepository.GetPaymentCardByCustomerReference(paymentRequest.CustomerReference);
+
+                paymentResponse.PaymentResponseMessage += $"The supplied Customer with reference = {paymentRequest.CustomerReference} not found.{Environment.NewLine}";
+
+                valid = customer != null || paymentCard != null;
+            }
+
+            return (valid, paymentResponse, customer, paymentCard);
         }
-        internal (bool, PaymentResponse) IsValidPayment(PaymentRequest paymentRequest, PaymentResponse paymentResponse)
+
+        public (bool, PaymentResponse) IsValidPayment(PaymentRequest paymentRequest, PaymentResponse paymentResponse)
         {
-            throw new NotImplementedException();
+            var validator = new PaymentRequestValidator();
+            var results = validator.Validate(paymentRequest);
+
+            if (!results.IsValid)
+            {
+                paymentResponse.PaymentResponseMessage += results.ToString(Environment.NewLine);
+                return (false, paymentResponse);
+            }
+
+            return (true, paymentResponse);
         }
-
-        public (bool, PaymentResponse) IsValid(PaymentRequest paymentRequest, PaymentResponse paymentResponse)
-        {
-            
-            (var isValidMerchant, paymentResponse) = IsValidMerchant(paymentRequest, paymentResponse);
-            (var isValidCustomer, paymentResponse) = IsValidCustomer(paymentRequest, paymentResponse);
-            (var isValidPayment, paymentResponse) = IsValidCustomer(paymentRequest, paymentResponse);
-
-            return (isValidCustomer && isValidPayment && isValidMerchant, PaymentResponse);
-        }
-
     }
 }

@@ -26,10 +26,8 @@ namespace Cko.PaymentGateway.Entities
     public enum PaymentState
     {
         UnProcessed,
-        Validated,
-        SentToBank,
         Approved,
         Rejected,
-        UnableToConnectToBank
+        PaymentFailed
     }
 }

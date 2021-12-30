@@ -8,16 +8,10 @@ using Refit;
 namespace Cko.PaymentGateway.Services
 {
 
-    public interface IPaymentProcessor2
-    {
-        Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest);
-        Task<Payment> GetPaymentDetails(int paymentId);
-    }
-
     /// <summary>
-    /// Payment processor service. Processes, stores and retrieves payments 
+    /// Payment processor service. Processes, stores and retrieves payments
     /// </summary>
-    public class PaymentProcessor2 : IPaymentProcessor2
+    public class PaymentProcessor : IPaymentProcessor
     {
         private readonly ILogger<PaymentProcessor> _logger;
         private readonly PaymentRepository _paymentRepository;
@@ -32,7 +26,7 @@ namespace Cko.PaymentGateway.Services
         private readonly BankInterface _bankInterface;
         private readonly IMapper _mapper;
 
-        public PaymentProcessor2(ILogger<PaymentProcessor> logger,
+        public PaymentProcessor(ILogger<PaymentProcessor> logger,
                                 PaymentRepository paymentRepository,
                                 BankRepository bankRepository,
                                 CustomerRepository customerRepository,
@@ -76,188 +70,61 @@ namespace Cko.PaymentGateway.Services
             var payment = _mapper.Map<Payment>(paymentRequest);
 
             await _paymentPersistor.SavePayment(payment);
+            var paymentId = payment.PaymentId;
+            _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
 
             PaymentResponse? paymentResponse = new PaymentResponse { PaymentId = paymentId };
 
-            (var valid, paymentResponse) = _paymentValidator.IsValid(paymentRequest, paymentResponse);
+            // Run all the validations for payment
+            (var validMerchant, paymentResponse) = await _paymentValidator.IsValidMerchant(paymentRequest, paymentResponse);
+            (var validCustomer, paymentResponse, var customer, var paymentCard) = await _paymentValidator.IsValidCustomer(paymentRequest, paymentResponse);
 
+            _logger.LogDebug("Payment validated");
+
+            // Fill in payment details from the database if needed
+            if (customer != null && paymentCard != null)
+                EnrichPaymentRequest(customer, paymentCard, paymentRequest);
+
+            (var validPaymentDetails, paymentResponse) = _paymentValidator.IsValidPayment(paymentRequest, paymentResponse);
+
+            bool valid = validCustomer && validMerchant && validPaymentDetails;
             if (!valid)
             {
-                return paymentResponse;
-            }
-
-            await _paymentPersistor.SaveCustomerDetails(paymentRequest);
-            await _bankInteface.Pay(paymentCard);
-        }
-
-            
-
-            // create a new Payment object
-            var payment = _mapper.Map<Payment>(paymentRequest);
-            payment.State = PaymentState.Validated;
-            var paymentId = await _paymentRepository.Insert(payment);
-
-            _logger.LogDebug("Created a new Payment with id={paymentId}", paymentId);
-
-
-            var merchant = await _merchantRepository.GetMerchantByIdentifier(paymentRequest.MerchantId);
-            if (merchant == null)
-            {
-                paymentResponse.Status = PaymentResponseStatus.Rejected_MerchantNotFound;
-                paymentResponse.PaymentResponseMessage = $"The supplied Merchant with Id = {paymentRequest.MerchantId} not found";
-
+                paymentResponse.Status = PaymentResponseStatus.Rejected_ValidationFailed;
                 await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
                 return paymentResponse;
             }
 
-            Customer customer = new Customer();
-            PaymentCard paymentCard = new PaymentCard();
-
-
-
-            // If the merchant passes in a Customer reference, then it should exist in the system
-            if (paymentRequest.CustomerReference != Guid.Empty)
-            {
-                customer = await _customerRepository.GetCustomerByReference(paymentRequest.CustomerReference);
-                paymentCard = await _paymentCardRepository.GetPaymentCardByCustomerReference(paymentRequest.CustomerReference);
-
-                if (customer == null)
-                {
-                    paymentResponse.Status = PaymentResponseStatus.Rejected_BankNotFound;
-                    paymentResponse.PaymentResponseMessage = $"The supplied Customer with reference = {paymentRequest.CustomerReference} not found";
-
-                    await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
-
-                    return paymentResponse;
-
-                }
-
-                // Fill in payment details from the database if needed
-                paymentRequest.CardExpiry = paymentRequest.CardExpiry == default(DateTime) ? paymentCard.CardExpiry : paymentRequest.CardExpiry;
-                paymentRequest.CustomerName = string.IsNullOrWhiteSpace(paymentRequest.CustomerName) ? paymentCard.CustomerName : paymentRequest.CustomerName;
-                paymentRequest.CustomerAddress = string.IsNullOrWhiteSpace(paymentRequest.CustomerAddress) ? paymentCard.CustomerName : paymentRequest.CustomerName;
-                paymentRequest.CardNumber = string.IsNullOrWhiteSpace(paymentRequest.CardNumber) ? paymentCard.CardNumber : paymentRequest.CardNumber;
-                paymentRequest.Cvv = string.IsNullOrWhiteSpace(paymentRequest.Cvv) ? paymentCard.Cvv : paymentRequest.Cvv;
-                paymentRequest.BankIdentifierCode = string.IsNullOrWhiteSpace(paymentRequest.BankIdentifierCode) ? paymentCard.BankIdentifierCode : paymentRequest.BankIdentifierCode;
-
-            }
-
-            var (valid, validationMessage) = IsValid(paymentRequest);
-
-            if (!valid)
-            {
-                paymentResponse.Status = PaymentResponseStatus.Rejected_CardValidationFailed;
-                paymentResponse.PaymentResponseMessage = validationMessage;
-
-                await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
-                return paymentResponse;
-            }
-
-            // fill in customer info from the payment Request
-            paymentCard.CardExpiry = paymentRequest.CardExpiry == default(DateTime) ? paymentCard.CardExpiry : paymentRequest.CardExpiry;
-            paymentCard.CardNumber = string.IsNullOrWhiteSpace(paymentRequest.CardNumber) ? paymentCard.CardNumber : paymentRequest.CardNumber;
-            paymentCard.CustomerAddress = string.IsNullOrWhiteSpace(paymentRequest.CustomerAddress) ? paymentCard.CustomerAddress : paymentRequest.CustomerAddress;
-            paymentCard.CustomerName = string.IsNullOrWhiteSpace(paymentRequest.CustomerName) ? paymentCard.CustomerName : paymentRequest.CustomerName;
-
-            customer.CustomerName = paymentRequest.CustomerName == default(string) ? customer.CustomerName : paymentRequest.CustomerName;
-            customer.CustomerAddress = paymentRequest.CustomerAddress == default(string) ? customer.CustomerAddress : paymentRequest.CustomerAddress;
-
-            // Save if needed
+            // If the request is valid and we need to save Cust & Card details
             if (paymentRequest.SaveCustomerDetails)
+               await _paymentPersistor.SaveCustomerDetails(paymentRequest, customer ?? new Customer(), paymentCard ?? new PaymentCard());
+
+            (var paid, paymentResponse, var bankPaymentResponse) = await _bankInterface.Pay(paymentRequest, paymentResponse, paymentCard);
+            if (!paid)
             {
-                if (paymentRequest.CustomerReference == Guid.Empty)
-                {
-                    var custRef = Guid.NewGuid();
-                    customer.CustomerReference = custRef;
-                    payment.CustomerReference = custRef;
-                    paymentCard.CustomerReference = custRef;
-
-                    await _customerRepository.Insert(customer);
-                    await _paymentCardRepository.Insert(paymentCard);
-                }
-                else
-                {
-                    await _customerRepository.Update(customer);
-                    await _paymentCardRepository.Update(paymentCard);
-                }
-            }
-
-            paymentResponse.Status = PaymentResponseStatus.Validated;
-            paymentResponse.PaymentResponseMessage = "Card accepted, sending to bank";
-
-            var bankId = paymentRequest.BankIdentifierCode;
-            var bank = await _bankRepository.GetBankByIdentifier(bankId);
-
-            if (bank == null)
-            {
-                paymentResponse.Status = PaymentResponseStatus.Rejected_BankNotFound;
-                paymentResponse.PaymentResponseMessage = $"The supplied Bank with code = {paymentRequest.BankIdentifierCode} not found";
-
-                await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
-
+                paymentResponse.Status = PaymentResponseStatus.Rejected_PaymentFailed;
+                await UpdatePaymentState(payment, PaymentState.PaymentFailed, paymentResponse.PaymentResponseMessage);
                 return paymentResponse;
             }
 
-            var bankPaymentReq = MakeBankPaymentRequest(paymentCard);
+            // Payment succeeded!
+            payment.PaymentReference = bankPaymentResponse.PaymentReference;
+            paymentResponse.Status = PaymentResponseStatus.Approved;
+            await UpdatePaymentState(payment, PaymentState.Approved, paymentResponse.PaymentResponseMessage);
+            _logger.LogDebug("Payment succeeded");
 
-            IBankSdk banksdk = null;
-            try
-            {
-                banksdk = _bankFunc(bank.BankApiUrl);
-            }
-            catch (Exception)
-            {
-                paymentResponse.Status = PaymentResponseStatus.Rejected_UnableToConnectToBank;
-                paymentResponse.PaymentResponseMessage = "Unable to connect to the bank";
-
-                await UpdatePaymentState(payment, PaymentState.UnableToConnectToBank, paymentResponse.PaymentResponseMessage);
-
-                throw;
-            }
-
-            var bankResponse = await banksdk.ProcessPayment(bankPaymentReq);
-            if (bankResponse.BankReponseCode == 0)
-            {
-                paymentResponse.Status = PaymentResponseStatus.Approved;
-                paymentResponse.PaymentResponseMessage = "Payment processed";
-                paymentResponse.PaymentReference = bankResponse.PaymentReference;
-                payment.PaymentReference = bankResponse.PaymentReference;
-
-                await UpdatePaymentState(payment, PaymentState.Approved, paymentResponse.PaymentResponseMessage);
-            }
-            else
-            {
-                paymentResponse.Status = PaymentResponseStatus.Rejected_DeclinedByBank;
-                paymentResponse.PaymentResponseMessage = bankResponse.BankPaymentResponseMessage;
-
-                await UpdatePaymentState(payment, PaymentState.Rejected, paymentResponse.PaymentResponseMessage);
-            }
             return paymentResponse;
         }
 
-        private BankPaymentRequest MakeBankPaymentRequest(PaymentCard paymentCard)
+        private void EnrichPaymentRequest(Customer customer, PaymentCard paymentCard, PaymentRequest paymentRequest)
         {
-            var bankReq = new BankPaymentRequest();
-            bankReq.CustomerName = paymentCard.CustomerName;
-            bankReq.CardNumber = paymentCard.CardNumber;
-            bankReq.CustomerAddress = paymentCard.CustomerAddress;
-            bankReq.Cvv = paymentCard.Cvv;
-            bankReq.CardExpiry = paymentCard.CardExpiry;
-
-            return bankReq;
+            paymentRequest.CardExpiry = paymentRequest.CardExpiry == default(DateTime) ? paymentCard.CardExpiry : paymentRequest.CardExpiry;
+            paymentRequest.CustomerName = string.IsNullOrWhiteSpace(paymentRequest.CustomerName) ? paymentCard.CustomerName : paymentRequest.CustomerName;
+            paymentRequest.CustomerAddress = string.IsNullOrWhiteSpace(paymentRequest.CustomerAddress) ? paymentCard.CustomerName : paymentRequest.CustomerName;
+            paymentRequest.CardNumber = string.IsNullOrWhiteSpace(paymentRequest.CardNumber) ? paymentCard.CardNumber : paymentRequest.CardNumber;
+            paymentRequest.Cvv = string.IsNullOrWhiteSpace(paymentRequest.Cvv) ? paymentCard.Cvv : paymentRequest.Cvv;
+            paymentRequest.BankIdentifierCode = string.IsNullOrWhiteSpace(paymentRequest.BankIdentifierCode) ? paymentCard.BankIdentifierCode : paymentRequest.BankIdentifierCode;
         }
 
-        internal (bool result, string message) IsValid(PaymentRequest payment)
-        {
-            var validator = new PaymentRequestValidator();
-            var results = validator.Validate(payment);
-            if (!results.IsValid)
-            {
-
-                return (false, results.ToString(Environment.NewLine));
-            }
-
-            return (true, string.Empty);
-        }
     }
 }
